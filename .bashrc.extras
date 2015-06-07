@@ -1,0 +1,5 @@
+# Additions to .bashrc
+# Add to your .bashrc: source unix_stuff/.bashrc.extras
+
+export LESS=-XFR
+export EDITOR=emacs
