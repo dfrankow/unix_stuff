@@ -1,2 +1,6 @@
 [alias]
 	co = checkout
+
+[push]
+	# Without this, git is chatty
+	default = simple
