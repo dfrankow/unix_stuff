@@ -31,3 +31,6 @@
 ;; Scala
 ; (unless (package-installed-p 'scala-mode2)
 ;  (package-refresh-contents) (package-install 'scala-mode2))
+
+(require 'sql)
+(add-to-list 'auto-mode-alist '("\\.q$" . sql-mode))
