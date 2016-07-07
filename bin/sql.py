@@ -1,6 +1,13 @@
 #!/usr/bin/env python2.6
 
-"""Run a SQL statement on a text file"""
+"""Run a SQL statement on a text file.
+
+The text file is referred to as the 'data' table in the SQL statement.
+
+Examples:
+
+sql.py --file stats.usmen.tsv --sql 'select avg(`q2.rate`) from data'
+"""
 
 import os
 import sys
@@ -67,6 +74,8 @@ def main(argv=None):
     if not sql:
         print >>sys.stderr, "Must give --sql"
         sys.exit(1)
+    if not ('data' in sql):
+        print >>sys.stderr, "WARNING: SELECT statement probably should refer to 'data' table"
 
     # Get the first line of the file to make a CREATE statement
     #
