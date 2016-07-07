@@ -37,6 +37,7 @@ def main(argv=None):
             opts, args = getopt.getopt(argv[1:], "h",
                                        ["help", "file=", "sql=",
                                         "leave-sqlite-file",
+                                        "show-header",
                                         "debug",
                                         "log-sqlite-commands"])
         except getopt.error, msg:
@@ -51,6 +52,7 @@ def main(argv=None):
     leave_sqlite_file = False
     log_sqlite_commands = False
     debug = False
+    show_header = True
     for o, a in opts:
         if o in ("-h", "--help"):
             usage()
@@ -65,6 +67,8 @@ def main(argv=None):
             log_sqlite_commands = True
         elif o in ("--debug"):
             debug = True
+        elif o in ("--show-header"):
+            show_header = True
         else:
             print "Found unexpected option " + o
 
@@ -106,9 +110,11 @@ def main(argv=None):
     print >>cmdfile,create_statement
     print >>cmdfile,".separator '\t'"
     print >>cmdfile,".import '" + datafile.name + "' data"
+    if show_header:
+        print >>cmdfile, ".header on"
     print >>cmdfile, sql + ";"
     cmdfile.flush()
-    if log_sqlite_commands:
+    if debug or log_sqlite_commands:
         runCmd("cat %s" % cmdfile.name)
     runCmd("cat %s | sqlite3" % cmdfile.name)
 
