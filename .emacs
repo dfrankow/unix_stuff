@@ -35,3 +35,7 @@
 (require 'sql)
 (add-to-list 'auto-mode-alist '("\\.q$" . sql-mode))
 (add-to-list 'auto-mode-alist '("\\.ql$" . sql-mode))
+
+;; delete trailing whitespace upon save
+;; A little dangerous, but 99/100 times I want it
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
