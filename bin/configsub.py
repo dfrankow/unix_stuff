@@ -31,4 +31,8 @@ for line in sys.stdin.readlines():
     for var, value in config.iteritems():
         pattern = config_pattern[var]
         line = pattern.sub(str(value), line)
+    m = re.search('@[^@]+@', line)
+    if m:
+        print >>sys.stderr, "Unsubstituted pattern: %s" % m.group(0)
+        sys.exit(1)
     sys.stdout.write(line)
