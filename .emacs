@@ -39,3 +39,13 @@
 ;; delete trailing whitespace upon save
 ;; A little dangerous, but 99/100 times I want it
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;; See https://www.emacswiki.org/emacs/FileNameCache
+(require 'filecache)
+(file-cache-add-directory-using-find "/Users/dan/work/schemas")
+;; Add files to file cache when killing the buffer
+(defun file-cache-add-this-file ()
+  (and buffer-file-name
+       (file-exists-p buffer-file-name)
+       (file-cache-add-file buffer-file-name)))
+(add-hook 'kill-buffer-hook 'file-cache-add-this-file)
