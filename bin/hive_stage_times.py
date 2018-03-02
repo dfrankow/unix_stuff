@@ -27,7 +27,8 @@ for line in sys.stdin:
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
-for stage, begin_dt in begin_map.iteritems():
+for stage in sorted(begin_map.keys(), cmp=lambda x,y: cmp(begin_map[x], begin_map[y])):
+    begin_dt = begin_map[stage]
     end_dt = end_map.get(stage)
     reduce_begin_dt = reduce_begin_map.get(stage)
 
