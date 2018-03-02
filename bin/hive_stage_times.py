@@ -6,7 +6,7 @@ Print the first and last stage times.
 
 import re
 import sys
-# import datetime
+import datetime
 
 begin_map = {}
 end_map = {}
@@ -21,11 +21,13 @@ for line in sys.stdin:
             begin_map[stage] = dt
         end_map[stage] = dt
 
+DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
 for stage, begin_dt in begin_map.iteritems():
     end_dt = end_map.get(stage)
-# this should work, but isn't right now:
-#    begin_time = datetime.datetime.strptime(begin_dt, '%Y-%m-%d %H:%M:%S')
-#    end_time = datetime.datetime.strptime(end_dt, '%Y-%m-%d %H:%M:%S').time()
-#    tdiff = end_time - begin_time
 
-    print stage, begin_dt, 'to', end_map.get(stage)#, "%.1f hours" % (tdiff / 60/60)
+    begin_time = datetime.datetime.strptime(begin_dt, DATETIME_FORMAT)
+    end_time = datetime.datetime.strptime(end_dt, DATETIME_FORMAT)
+    tdiff = end_time - begin_time
+
+    print stage, begin_dt, 'to', end_map.get(stage), "%.1f hours" % (tdiff.total_seconds() / 60.0 / 60)
