@@ -65,14 +65,21 @@ for job in sorted(begin_map.keys(), cmp=lambda x,y: cmp(begin_map[x], begin_map[
 
     begin_time = datetime.datetime.strptime(begin_dt, DATETIME_FORMAT)
     end_time = datetime.datetime.strptime(end_dt, DATETIME_FORMAT)
-    reduce_begin_time = datetime.datetime.strptime(reduce_begin_dt, DATETIME_FORMAT)
+    reduce_begin_time = ''
+    if reduce_begin_dt:
+        reduce_begin_time = datetime.datetime.strptime(reduce_begin_dt, DATETIME_FORMAT)
     tdiff = end_time - begin_time
-    reduce_diff = end_time - reduce_begin_time
+    reduce_diff = ''
+    reduce_diff_hours = ''
+    if reduce_begin_time:
+        reduce_diff = end_time - reduce_begin_time
+        reduce_diff_hours = "%.1f hours" % (
+            reduce_diff.total_seconds() / 60.0 / 60)
 
     print '\t'.join([stage, begin_dt, end_dt,
                      "%.1f hours" % (tdiff.total_seconds() / 60.0 / 60),
                      # 'reduce began', reduce_begin_dt,
-                     "%.1f hours" % (reduce_diff.total_seconds() / 60.0 / 60),
+                     reduce_diff_hours,
                      num_mappers,
                      num_reducers,
                      job
