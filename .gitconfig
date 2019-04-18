@@ -4,3 +4,6 @@
 [push]
 	# Without this, git is chatty
 	default = simple
+
+[diff]
+        tool = tkdiff
