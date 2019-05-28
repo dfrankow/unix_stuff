@@ -42,7 +42,8 @@
 
 ;; See https://www.emacswiki.org/emacs/FileNameCache
 (require 'filecache)
-(file-cache-add-directory-using-find "/Users/dan/work/schemas")
+;;Used to have a 'schemas' directory:
+;;(file-cache-add-directory-using-find "/Users/dan/work/schemas")
 ;; Add files to file cache when killing the buffer
 (defun file-cache-add-this-file ()
   (and buffer-file-name
