@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Use Python's csv package to translate CSV files to tab-separated newline-delimited.
 
@@ -10,6 +10,6 @@ import sys
 
 csvreader = csv.reader(sys.stdin, delimiter=',')
 for row in csvreader:
-    for idx in xrange(len(row)):
+    for idx in range(len(row)):
         row[idx] = re.sub(r'[\t\r\n]', ' ', row[idx])
-    print '\t'.join(row)
+    print('\t'.join(row))
