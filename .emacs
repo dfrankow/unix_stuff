@@ -11,6 +11,13 @@
 ;; No tabs!
 (setq-default indent-tabs-mode nil)
 
+;; Draw tabs with the same color as trailing whitespace
+    ;; (add-hook 'font-lock-mode-hook
+    ;;           (lambda ()
+    ;;             (font-lock-add-keywords
+    ;;               nil
+    ;;               '(("\t" 0 'trailing-whitespace prepend)))))
+
 ;; match parens (forward and backward) stolen from 'emacs.faq'
 (global-set-key "?" 'match-paren)
 (defun match-paren (arg)
