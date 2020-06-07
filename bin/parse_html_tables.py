@@ -60,19 +60,19 @@ def parse_html_table(table):
     # if len(column_names) > 0 and len(column_names) != n_columns:
     #    raise Exception("Column titles do not match the number of columns")
 
-    # Column names are from th tags, or col1, col2, ...
-    columns = [f"col{col}" for col in range(0, n_columns)]
-    if column_names:
-        columns = column_names
-
     # TODO(dan): Handle table without id attribute
     filename = f"{table['id']}.tsv"
     logging.info(f"Write {filename}..")
     with open(filename, 'w') as the_tsv:
-        print('\t'.join([clean_text(col) for col in columns]),
-              file=the_tsv)
+        if not column_names:
+            # there were no column names, so print a fake header col1, col2, ..
+            print('\t'.join([f"col{col}" for col in range(n_columns)]),
+                  file=the_tsv)
         for row in table.find_all('tr'):
-            columns = row.find_all('td')
+            # always look for td or th because sometimes people use either in
+            # a row, possibly for formatting reasons
+            # this has the side effect of printing any existing table headers
+            columns = row.find_all(['td', 'th'])
             col_texts = [col.get_text() for col in columns]
             if col_texts:
                 print('\t'.join([clean_text(col) for col in col_texts]),
