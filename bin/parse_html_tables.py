@@ -74,8 +74,9 @@ def parse_html_table(table):
         for row in table.find_all('tr'):
             columns = row.find_all('td')
             col_texts = [col.get_text() for col in columns]
-            print('\t'.join([clean_text(col) for col in col_texts]),
-                  file=the_tsv)
+            if col_texts:
+                print('\t'.join([clean_text(col) for col in col_texts]),
+                      file=the_tsv)
 
 
 def main():
