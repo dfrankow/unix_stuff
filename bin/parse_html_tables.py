@@ -22,8 +22,10 @@ from bs4 import BeautifulSoup
 def parse_text(txt):
     """Parse all tables in the given HTML text"""
     soup = BeautifulSoup(txt, 'html.parser')
+    idx = 1
     for table in soup.find_all('table'):
-        parse_html_table(table)
+        parse_html_table(table, f'table{idx:03d}')
+        idx += 1
 
 
 def clean_text(txt):
@@ -31,12 +33,13 @@ def clean_text(txt):
     return txt.replace("\n", " ").replace("\t", " ").replace("\r", " ")
 
 
-def parse_html_table(table):
+def parse_html_table(table, backup_id):
     """Parse tables out of the beautifulsoup table and write them into files."""
     n_columns = 0
     column_names = []
 
-    # logging.info(f"*** table {table['id']}")
+    table_id = table.get('id', backup_id)
+    # logging.info(f"*** table {table_id}")
     # Find number of rows and columns
     # we also find the column titles if we can
     for row in table.find_all('tr'):
@@ -61,7 +64,7 @@ def parse_html_table(table):
     #    raise Exception("Column titles do not match the number of columns")
 
     # TODO(dan): Handle table without id attribute
-    filename = f"{table['id']}.tsv"
+    filename = f"{table_id}.tsv"
     logging.info(f"Write {filename}..")
     with open(filename, 'w') as the_tsv:
         if not column_names:
