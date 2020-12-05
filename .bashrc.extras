@@ -4,6 +4,12 @@
 export LESS=-XFR
 export EDITOR=emacs
 
-# BSD
-export LESS=-XIr
-alias ls="ls -FG"
+# "Darwin" is OS X
+# TODO: check for any BSD flavor
+if [[ `uname` == "Darwin" ]]; then
+    export LESS=-XIr
+    alias ls="ls -FG"
+fi
+
+# Remove all containers that have exited
+alias docker-rm-exited="docker rm $(docker ps -q -f status=exited)"
