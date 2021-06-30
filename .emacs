@@ -45,7 +45,7 @@
 
 ;; delete trailing whitespace upon save
 ;; A little dangerous, but 99/100 times I want it
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
+;; (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 ;; See https://www.emacswiki.org/emacs/FileNameCache
 (require 'filecache)
@@ -57,3 +57,6 @@
        (file-exists-p buffer-file-name)
        (file-cache-add-file buffer-file-name)))
 (add-hook 'kill-buffer-hook 'file-cache-add-this-file)
+
+;; javascript indent 2 spaces
+(setq js-indent-level 2)
