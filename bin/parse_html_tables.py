@@ -25,16 +25,16 @@ def parse_text(txt, leave_html):
     soup = BeautifulSoup(txt, 'html.parser')
     idx = 1
     for table in soup.find_all('table'):
-        parse_html_table(table, f'table{idx:03d}', leave_html)
+        _parse_html_table(table, f'table{idx:03d}', leave_html)
         idx += 1
 
 
-def clean_text(txt):
+def _clean_text(txt):
     """Make \t, \n, \r into spaces"""
     return txt.replace("\n", " ").replace("\t", " ").replace("\r", " ")
 
 
-def get_text(elem, leave_html):
+def _get_text(elem, leave_html):
     """Return elem.get_text() if leave_html is False, else str(elem)
 
     elem should be a td or th element.
@@ -50,7 +50,7 @@ def get_text(elem, leave_html):
     return val
 
 
-def parse_html_table(table, backup_id, leave_html):
+def _parse_html_table(table, backup_id, leave_html):
     """Parse tables out of the beautifulsoup table and write them into files."""
     n_columns = 0
     column_names = []
@@ -73,7 +73,7 @@ def parse_html_table(table, backup_id, leave_html):
         if len(th_tags) > 0 and len(column_names) == 0:
             assert len(column_names) == 0, "found more column names"
             for th in th_tags:
-                column_names.append(get_text(th, leave_html))
+                column_names.append(_get_text(th, leave_html))
 
     # TODO(dan): Handle colspan > 1
     # Safeguard on Column Titles
@@ -93,9 +93,9 @@ def parse_html_table(table, backup_id, leave_html):
             # a row, possibly for formatting reasons
             # this has the side effect of printing any existing table headers
             columns = row.find_all(['td', 'th'])
-            col_texts = [get_text(col, leave_html) for col in columns]
+            col_texts = [_get_text(col, leave_html) for col in columns]
             if col_texts:
-                print('\t'.join([clean_text(col) for col in col_texts]),
+                print('\t'.join([_clean_text(col) for col in col_texts]),
                       file=the_tsv)
 
 
