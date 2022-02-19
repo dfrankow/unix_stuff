@@ -14,17 +14,18 @@ Based on https://srome.github.io/Parsing-HTML-Tables-in-Python-with-BeautifulSou
 Requires beautifulsoup4==4.9.1.
 """
 
+import argparse
 import logging
 import sys
 from bs4 import BeautifulSoup
 
 
-def parse_text(txt):
+def parse_text(txt, leave_html):
     """Parse all tables in the given HTML text"""
     soup = BeautifulSoup(txt, 'html.parser')
     idx = 1
     for table in soup.find_all('table'):
-        parse_html_table(table, f'table{idx:03d}')
+        parse_html_table(table, f'table{idx:03d}', leave_html)
         idx += 1
 
 
@@ -33,7 +34,23 @@ def clean_text(txt):
     return txt.replace("\n", " ").replace("\t", " ").replace("\r", " ")
 
 
-def parse_html_table(table, backup_id):
+def get_text(elem, leave_html):
+    """Return elem.get_text() if leave_html is False, else str(elem)
+
+    elem should be a td or th element.
+    """
+    assert elem.name in (u'td', u'th')
+    val = None
+    if leave_html:
+        # Take everything, but not including the outer td or th tag
+        val = ''.join([str(elem1) for elem1 in elem.contents])
+    else:
+        # only the text
+        val = elem.get_text()
+    return val
+
+
+def parse_html_table(table, backup_id, leave_html):
     """Parse tables out of the beautifulsoup table and write them into files."""
     n_columns = 0
     column_names = []
@@ -56,7 +73,7 @@ def parse_html_table(table, backup_id):
         if len(th_tags) > 0 and len(column_names) == 0:
             assert len(column_names) == 0, "found more column names"
             for th in th_tags:
-                column_names.append(th.get_text())
+                column_names.append(get_text(th, leave_html))
 
     # TODO(dan): Handle colspan > 1
     # Safeguard on Column Titles
@@ -76,15 +93,23 @@ def parse_html_table(table, backup_id):
             # a row, possibly for formatting reasons
             # this has the side effect of printing any existing table headers
             columns = row.find_all(['td', 'th'])
-            col_texts = [col.get_text() for col in columns]
+            col_texts = [get_text(col, leave_html) for col in columns]
             if col_texts:
                 print('\t'.join([clean_text(col) for col in col_texts]),
                       file=the_tsv)
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description='Convert HTML tables to tab-separated values files')
+    parser.add_argument('--leave-html',
+                        action='store_true',
+                        default=False,
+                        help='Leave the HTML in each cell')
+    args = parser.parse_args()
+
     logging.basicConfig(format='%(name)s: %(message)s', level=logging.INFO)
-    parse_text(sys.stdin.read())
+    parse_text(sys.stdin.read(), args.leave_html)
 
 
 main()
