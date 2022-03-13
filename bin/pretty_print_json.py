@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 
 import argparse
 import json
@@ -13,8 +13,8 @@ args = parser.parse_args()
 
 if args.whole_file:
     the_obj = json.loads(sys.stdin.read())
-    print json.dumps(the_obj, sort_keys = True, indent=2)
+    print(json.dumps(the_obj, sort_keys = True, indent=2, ensure_ascii=False))
 else:
     for line in sys.stdin:
         the_obj = json.loads(line)
-        print json.dumps(the_obj, sort_keys = True, indent=2)
+        print(json.dumps(the_obj, sort_keys = True, indent=2, ensure_ascii=False))
