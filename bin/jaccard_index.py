@@ -6,7 +6,7 @@ Ignores duplicate lines.
 
 Example usage:
 
-$ jaccard_index.py <(script1) <(script2)
+$ jaccard_index.py <(head -50 file1) <(head -50 file2)
 # unique lines of file1: 25
 # unique lines of file2: 40
 # in intersection: 9
