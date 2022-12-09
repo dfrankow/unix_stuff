@@ -10,7 +10,7 @@ parser.add_argument('--whole-file', action='store_true',
                     help='If given, grab the whole file as one JSON blog')
 parser.add_argument('--sort-keys', action=argparse.BooleanOptionalAction,
                     help='sort the keys',
-                    default=True)
+                    default=False)
 args = parser.parse_args()
 
 if args.whole_file:
