@@ -9,6 +9,9 @@ export EDITOR=emacs
 if [[ `uname` == "Darwin" ]]; then
     export LESS=-XIr
     alias ls="ls -FG"
+    # See https://www.emacswiki.org/emacs/EmacsForMacOS#h5o-25
+    export EDITOR="/Applications/Emacs.app/Contents/MacOS/Emacs"
+    alias emacs="$EDITOR"
 fi
 
 # Remove all containers that have exited
