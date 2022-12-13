@@ -11,57 +11,9 @@ It doesn't deal with some punctuation, especially quotes and commas.
 """
 
 import argparse
-import re
 from collections import defaultdict
 
-
-def _match_dict_with(line, regex, group1, group2):
-    entries = {}
-    # Note: this matches only those dicts where the entries can be stripped.
-    for match in re.finditer(regex, line):
-        key, val = match.group(group1).strip(), match.group(group2).strip()
-        assert key not in entries
-        entries[key] = val
-    return entries
-
-
-def _match_java_dict(line):
-    # Note: this matches only those dicts where the entries don't
-    # contain =,{, and can be stripped.
-    return _match_dict_with(
-        line,
-        '(([^={},]+)=([^=,{}]+))+',
-        2, 3)
-
-
-def _match_python_dict(line):
-    # Note: this matches only those dicts where the entries don't
-    # contain :,{, and can be stripped.
-    #
-    # HACK: this doesn't deal with quotes correctly
-    return _match_dict_with(
-        line,
-        '(\'|")?(([^:{},\'"]+)(\'|")?: (\'|")?([^:,\'"{}]+)(\'|")?)+',
-        3, 6)
-
-
-def _match_dict(line):
-    dict1 = _match_java_dict(line)
-    dict2 = _match_python_dict(line)
-    the_dict = dict1
-    if len(dict2) > len(dict1):
-        the_dict = dict2
-    return the_dict
-
-
-def _match_largest_dict(filename):
-    the_dict1 = {}
-    with open(filename) as the_file:
-        for line in the_file:
-            a_dict = _match_dict(line)
-            if len(a_dict) > len(the_dict1):
-                the_dict1 = a_dict
-    return the_dict1
+from parse_dict import _match_largest_dict
 
 
 def main():
@@ -71,8 +23,10 @@ def main():
     parser.add_argument('file2', help='File 2')
     args = parser.parse_args()
 
-    the_dict1 = _match_largest_dict(args.file1)
-    the_dict2 = _match_largest_dict(args.file2)
+    with open(args.file1) as file1:
+        the_dict1 = _match_largest_dict(file1)
+    with open(args.file2) as file2:
+        the_dict2 = _match_largest_dict(file2)
 
     # compare keys
     if the_dict1.keys() == the_dict2.keys():
@@ -116,4 +70,5 @@ def main():
             print(f"** {same_dict[key]} {key} values:\n\n{output[key]}")
 
 
-main()
+if __name__ == '__main__':
+    main()
