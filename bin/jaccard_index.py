@@ -38,5 +38,5 @@ def main():
     print(f"# in union: {union}")
     print(f"jaccard index: {jaccard}")
 
-
-main()
+if __name__ == '__main__':
+    main()
