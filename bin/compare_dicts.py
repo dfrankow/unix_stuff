@@ -28,6 +28,8 @@ def main():
     with open(args.file2) as file2:
         the_dict2 = _match_largest_dict(file2)
 
+    print(f"{len(the_dict1)} entries in dict1")
+    print(f"{len(the_dict2)} entries in dict2")
     # compare keys
     if the_dict1.keys() == the_dict2.keys():
         print("same keys")
