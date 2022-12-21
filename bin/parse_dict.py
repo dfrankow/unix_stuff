@@ -34,12 +34,12 @@ def _match_java_dict(line):
 
 def _match_python_dict(line):
     # Note: this matches only those dicts where the entries don't
-    # contain :,{, and can be stripped.
+    # contain ,{, and can be stripped.
     #
     # HACK: this doesn't deal with quotes correctly
     return _match_dict_with(
         line,
-        '(\'|")?(([^:{},\'"]+)(\'|")?: (\'|")?([^:,\'"{}]+)(\'|")?)+',
+        '(\'|")?(([^{},\'"]+)(\'|")?: (\'|")?([^,\'"{}]+)(\'|")?)+',
         3, 6)
 
 
