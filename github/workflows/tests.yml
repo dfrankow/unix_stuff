@@ -1,0 +1,62 @@
+# A simple default github workflow for testing
+# See also https://docs.github.com/en/actions/using-workflows
+name: Tests
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    strategy:
+      max-parallel: 4
+      matrix:
+        # should be the same version as what we're running in production
+        python-version: ['3.10']
+
+    services:
+      postgres:
+        # image should match heroku and/or docker-compose.yaml
+        image: postgres:14
+        env: # must match with settings from $DJANGO_SETTINGS_MODULE
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: github-actions
+        ports:
+          - 5432:5432 # exposing 5432 port for application to use
+        # needed because the postgres container does not provide a healthcheck
+        options: >-
+          --health-cmd pg_isready --health-interval 10s
+          --health-timeout 5s --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    # see https://github.com/pre-commit/action/#using-this-action
+    - name: pre-commit checks
+      uses: pre-commit/action@v2.0.0
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run Tests
+      run: |
+        # Django tests
+        python manage.py collectstatic --noinput
+        python manage.py migrate
+        python manage.py test
+      env:
+        # Variables for unit tests
+        DJANGO_SETTINGS_MODULE: myapp.settings
+        # For Django encryption
+        DJANGO_SECRET_KEY: some_value
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/github-actions
+
+#    - name: Django deploy check
+#      run: |
+#        python manage.py check --deploy --fail-level WARNING
+#      env:
+#        DJANGO_SETTINGS_MODULE: reviewer.settings
+#        DJANGO_SECRET_KEY: this-has-to-be-at-least-51-characters-and-6-unique-ones

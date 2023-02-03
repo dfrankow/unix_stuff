@@ -1,0 +1,105 @@
+# See http://pre-commit.com/#python
+# See https://github.com/pre-commit/pre-commit-hooks
+# Run 'pre-commit install' to install the pre-commit hooks
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+  - id: check-added-large-files
+  - id: check-ast
+  - id: check-case-conflict
+  - id: check-docstring-first
+  - id: check-merge-conflict
+  - id: check-symlinks
+  - id: debug-statements
+  - id: detect-private-key
+  # black handles quoting
+  # - id: double-quote-string-fixer
+  - id: end-of-file-fixer
+  - id: mixed-line-ending
+  - id: trailing-whitespace
+
+- repo: https://github.com/ambv/black
+  rev: 22.12.0
+  hooks:
+  - id: black
+    language_version: python3.10
+    # exclude Django migrations
+    exclude: ^migrations/
+
+# flake8 after black, so black can fix formatting first
+- repo: https://github.com/pycqa/flake8
+  rev: 6.0.0
+  hooks:
+  - id: flake8
+    # exclude Django migrations
+    exclude: migrations/
+
+# Use black instead of autoflake
+#- repo: https://github.com/myint/autoflake
+#  rev: v1.4
+#  hooks:
+#  - id: autoflake
+#    args:
+#      - --in-place
+#      - --remove-unused-variables
+#      - --remove-all-unused-imports
+
+# black handles import sorting.
+# - repo: https://github.com/PyCQA/isort
+#   rev: 5.11.4
+#   hooks:
+#     - id: isort
+#       args:
+#         - --src=src,bin
+
+# possibly re-enable pylint.  it's very picky.
+# - repo: https://github.com/PyCQA/pylint
+#   rev: v2.16.0b1
+#   hooks:
+#     - id: pylint
+#       args:
+#         - --disable=consider-using-in
+#         - --disable=disallowed-name
+#         - --disable=fixme
+#         - --disable=import-error
+#         - --disable=logging-fstring-interpolation
+#         - --disable=missing-class-docstring
+#         - --disable=missing-function-docstring
+#         - --disable=missing-module-docstring
+#         - --disable=no-name-in-module
+#         - --disable=no-member
+#         - --disable=too-few-public-methods
+#         - --disable=too-many-instance-attributes
+#         - --disable=too-many-arguments
+#         - --disable=too-many-branches
+#         - --disable=too-many-locals
+#         - --disable=unpacking-non-sequence
+#         # re-enable these args
+#         - --disable=unused-argument
+#         - --disable=protected-access
+#         - --disable=invalid-name
+#         - --disable=raise-missing-from
+#         - --disable=wrong-import-order
+#         - --disable
+
+# leave mypy out for now
+#- repo: https://github.com/pre-commit/mirrors-mypy
+#  rev: v0.942
+#  hooks:
+#    - id: mypy
+#      additional_dependencies:
+#        - types-requests
+#      args:
+#        - --ignore-missing-imports
+
+- repo: https://github.com/Lucas-C/pre-commit-hooks
+  rev: v1.4.1
+  hooks:
+  - id: forbid-crlf
+  # don't just remove, seems dangerous
+  # - id: remove-crlf
+  - id: forbid-tabs
+    exclude: (README.md|.tsv)$
+  # don't just remove, seems dangerous
+  # - id: remove-tabs
