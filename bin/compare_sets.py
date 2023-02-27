@@ -97,6 +97,8 @@ def main():
     if the_set1 == the_set2:
         print("same")
     else:
+        intersection = the_set1.intersection(the_set2)
+        print(f"{len(intersection)} keys in common: {intersection}")
         diff1 = the_set1 - the_set2
         print(f"{len(diff1)} keys in set1 not in set2: {diff1}")
         diff2 = the_set2 - the_set1

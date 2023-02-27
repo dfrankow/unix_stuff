@@ -48,8 +48,9 @@ def main():
         # Output like comm
         lines1 = sorted(lines1)
         lines2 = sorted(lines2)
-        for line in (list(intersection) + list(set(lines1)-intersection)
-                + list(set(lines2)-intersection)):
+        for line in (sorted(list(intersection))
+                     + sorted(list(set(lines1)-intersection))
+                     + sorted(list(set(lines2)-intersection))):
             line1 = line.replace('\n', '')
             print(line1, "\t", end='')
             if line in intersection:
