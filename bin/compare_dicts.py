@@ -21,6 +21,7 @@ def main():
 
     parser.add_argument('file1', help='File 1')
     parser.add_argument('file2', help='File 2')
+    parser.add_argument('--verbose', action='store_true')
     args = parser.parse_args()
 
     with open(args.file1) as file1:
@@ -68,7 +69,7 @@ def main():
     print()
 
     for key in sorted(same_dict.keys()):
-        if key not in ('same', 'close'):
+        if args.verbose or (key not in ('same', 'close')):
             print(f"** {same_dict[key]} {key} values:\n\n{output[key]}")
 
 
