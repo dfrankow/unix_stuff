@@ -5,3 +5,12 @@
 
 # tmp
 tmp/
+
+# I put virtualenv at .venv
+.venv
+
+# direnv uses .envrc
+.envrc
+
+# python
+__pycache__
