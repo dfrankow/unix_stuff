@@ -60,3 +60,23 @@
 
 ;; javascript indent 2 spaces
 (setq js-indent-level 2)
+
+;; disable final newline
+(defun disable-final-newline ()
+  (setq-default mode-require-final-newline nil)
+  (setq-default require-final-newline nil)
+  (setq mode-require-final-newline nil)
+  (setq require-final-newline nil))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(require-final-newline nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
