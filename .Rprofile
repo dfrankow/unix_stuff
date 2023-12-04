@@ -3,7 +3,7 @@ if (interactive()) {
 
     conflict_prefer("filter", "dplyr")
     conflict_prefer("lag", "dplyr")
-    conflict_prefer("select", "dplyr") 
+    conflict_prefer("select", "dplyr")
     conflict_prefer("margins", "margins")
     conflict_prefer("View", "utils")
 
