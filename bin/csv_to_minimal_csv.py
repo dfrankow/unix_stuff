@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 
-"""Use Python's csv package to translate CSV files to tab-separated newline-delimited.
-
-Removes tabs and newlines.
-"""
+"""Use Python's csv package to remove quotes in a csv where possible."""
 import csv
-import re
 import sys
 
 # Python 3.7 and newer
@@ -16,7 +12,6 @@ import sys
 csv.field_size_limit(sys.maxsize)
 
 csvreader = csv.reader(sys.stdin, delimiter=",")
+csvwriter = csv.writer(sys.stdout, quoting=csv.QUOTE_MINIMAL)
 for row in csvreader:
-    for idx in range(len(row)):
-        row[idx] = re.sub(r"[\t\r\n]", " ", row[idx])
-    print("\t".join(row))
+    csvwriter.writerow(row)
