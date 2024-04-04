@@ -5,19 +5,19 @@ repos:
 
 # See also https://adamj.eu/tech/2021/09/16/introducing-django-upgrade/
 - repo: https://github.com/asottile/pyupgrade
-  rev: v2.26.0
+  rev: v3.15.2
   hooks:
     - id: pyupgrade
       args: [ --py39-plus ]
 
 - repo: https://github.com/adamchainz/django-upgrade
-  rev: 1.2.0
+  rev: 1.16.0
   hooks:
     - id: django-upgrade
       args: [--target-version, "3.2"]
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v4.5.0
   hooks:
   - id: check-added-large-files
   - id: check-ast
@@ -39,7 +39,7 @@ repos:
   - id: no-commit-to-branch
 
 - repo: https://github.com/ambv/black
-  rev: 23.1.0
+  rev: 24.3.0
   hooks:
   - id: black
     language_version: python3.9
@@ -48,14 +48,14 @@ repos:
 
 # flake8 after black, so black can fix formatting first
 - repo: https://github.com/pycqa/flake8
-  rev: 6.0.0
+  rev: 7.0.0
   hooks:
   - id: flake8
     # django migrations
     exclude: migrations/
 
 - repo: https://github.com/PyCQA/isort
-  rev: 5.12.0
+  rev: 5.13.2
   hooks:
     - id: isort
       args:
@@ -69,7 +69,7 @@ repos:
         - --profile=black
 
 - repo: https://github.com/rtts/djhtml
-  rev: '3.0.2'
+  rev: '3.0.6'
   hooks:
     - id: djhtml
     - id: djcss
@@ -116,7 +116,7 @@ repos:
 #        - --ignore-missing-imports
 
 - repo: https://github.com/Lucas-C/pre-commit-hooks
-  rev: v1.4.2
+  rev: v1.5.5
   hooks:
   - id: forbid-crlf
   # don't just remove, seems dangerous
