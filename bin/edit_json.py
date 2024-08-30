@@ -29,7 +29,10 @@ def main():
         help="Write each json record in a compact one-line format, "
         "otherwise it is multi-line and indented.",
     )
-    parser.add_argument("code")
+    parser.add_argument(
+        "code",
+        help="Code to execute against each record, stored in a variable called 'data'.",
+    )
     args = parser.parse_args()
 
     input_data = (json.loads(line) for line in sys.stdin)
@@ -46,7 +49,7 @@ def main():
             print(",") if args.array else print()
 
         data_dict = {"data": data}
-        exec("data=" + args.code, data_dict)
+        exec(args.code, data_dict)
         print(json.dumps(data_dict["data"], indent=None if args.compact else 2), end="")
     if args.array:
         print("]")
