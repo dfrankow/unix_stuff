@@ -42,15 +42,25 @@ def main():
     if args.array:
         print("[")
     first = True
+    data_not_none = False
     for data in input_data:
-        if first:
-            first = False
-        else:
-            print(",") if args.array else print()
-
+        # transform data
         data_dict = {"data": data}
         exec(args.code, data_dict)
-        print(json.dumps(data_dict["data"], indent=None if args.compact else 2), end="")
+        data = data_dict["data"]
+
+        # print data (possibly with a leading comma for --array mode)
+        data_not_none = data is not None
+        if args.array and data_not_none:
+            if not first:
+                print(",")
+            first = False
+
+        if data_not_none:
+            print(
+                json.dumps(data_dict["data"], indent=None if args.compact else 2),
+                end="",
+            )
     if args.array:
         print("]")
 
