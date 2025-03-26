@@ -7,6 +7,9 @@ if (interactive()) {
     conflict_prefer("margins", "margins")
     conflict_prefer("View", "utils")
 
+    # try vroom over readr
+    conflict_prefer_all("vroom", "readr")
+
     # leave this out so I write fewer bugs:
     # conflict_prefer("get", "base")
 
