@@ -1,9 +1,16 @@
+# Shared Git config checked into ~/unix_stuff.
+# Setup on each laptop by adding this to ~/.gitconfig:
+# [include]
+#     path = /Users/me/unix_stuff/.gitconfig
+
 [alias]
-	co = checkout
+    co = checkout
+    gone = "!f() { git fetch -p && git branch -vv | grep \": gone]\" | awk \"{print \\$1}\"; }; f"
+    rm-gone = "!f() { git gone | while read branch_name; do git branch -D \"$branch_name\"; done; }; f"
 
 [push]
-	# Without this, git is chatty
-	default = simple
+    # Without this, git is chatty
+    default = simple
 
 [diff]
         tool = tkdiff
