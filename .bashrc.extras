@@ -20,3 +20,7 @@ alias docker-rm-exited='docker rm $(docker ps -q -f status=exited)'
 if [[ -r ~/.django_bash_completion.sh ]]; then
    source ~/.django_bash_completion.sh
 fi
+
+
+# takes output of uniq -c and produces a tsv
+alias uniqtsv='perl -lpe '\''s/^\s*(\d+)\s+(.*)/$1\t$2/'\'''
