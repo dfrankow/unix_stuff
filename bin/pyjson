@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+import argparse
+import json
+import sys
+from itertools import chain
+from collections import defaultdict
+
+
+# Utility functions
+def fmap(func, data):
+    return list(map(func, data))
+
+
+def filtermap(func, pred, data):
+    return [func(item) for item in data if pred(item)]
+
+
+def group_by(key_func, data):
+    grouped = defaultdict(list)
+    for item in data:
+        grouped[key_func(item)].append(item)
+    return dict(grouped)
+
+
+def del_keys(data, keys):
+    return [{k: v for k, v in item.items() if k not in keys} for item in data]
+
+
+def flatten(data):
+    return list(chain.from_iterable(data))
+
+
+# Detect NDJSON by checking multiple lines
+def detect_ndjson(lines):
+    try:
+        # Attempt to parse each line, valid JSON lines imply NDJSON
+        for line in lines:
+            json.loads(line)
+        return True
+    except json.JSONDecodeError:
+        return False
+
+
+# Main logic
+def main():
+    parser = argparse.ArgumentParser(
+        description="Manipulate JSON or NDJSON using Python expressions."
+    )
+    parser.add_argument(
+        "expression", type=str, help="Python expression using `x` as the input."
+    )
+    parser.add_argument(
+        "-f", "--file", type=str, help="Input JSON/NDJSON file (or use stdin)."
+    )
+    args = parser.parse_args()
+
+    try:
+        # Read data
+        if args.file:
+            with open(args.file, "r") as f:
+                lines = f.readlines()
+        else:
+            lines = sys.stdin.read().splitlines()
+
+        # Detect JSON or NDJSON
+        is_ndjson = detect_ndjson(lines)
+        data = (
+            [json.loads(line) for line in lines]
+            if is_ndjson
+            else json.loads("".join(lines))
+        )
+
+        # Execute expression
+        result = eval(
+            args.expression,
+            {
+                "x": data,
+                "__builtins__": {},
+                "fmap": fmap,
+                "filtermap": filtermap,
+                "group_by": group_by,
+                "del_keys": del_keys,
+                "flatten": flatten,
+            },
+        )
+
+        # Output results
+        if isinstance(result, list) and all(isinstance(item, dict) for item in result):
+            for item in result:
+                print(json.dumps(item))
+        else:
+            print(json.dumps(result, indent=2))
+
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
