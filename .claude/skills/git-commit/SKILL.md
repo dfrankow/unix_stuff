@@ -1,5 +1,5 @@
 ---
-name: git-commit-generator
+name: git-commit
 description: ALWAYS use this skill when committing code. Triggers on any commit request including "commit", "git commit", "commit your code", "commit this", "make a commit", etc.
 ---
 
