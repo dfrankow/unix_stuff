@@ -4,6 +4,7 @@
 
 Removes tabs and newlines.
 """
+
 import csv
 import re
 import sys

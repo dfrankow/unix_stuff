@@ -11,5 +11,7 @@ Usage: date_add.py 2016-07-01 -27
 import datetime
 import sys
 
-print (datetime.datetime.strptime(sys.argv[1], '%Y-%m-%d').date() +
-       datetime.timedelta(int(sys.argv[2])))
+print(
+    datetime.datetime.strptime(sys.argv[1], "%Y-%m-%d").date()
+    + datetime.timedelta(int(sys.argv[2]))
+)

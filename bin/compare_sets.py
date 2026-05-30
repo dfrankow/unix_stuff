@@ -28,10 +28,7 @@ def _match_set_with(line, regex, group):
 def _match_java_set(line):
     # Note: this matches only those sets where the entries don't
     # contain =,{, and can be stripped.
-    return _match_set_with(
-        line,
-        '(([^={},]+)(, )?)+',
-        2)
+    return _match_set_with(line, "(([^={},]+)(, )?)+", 2)
 
 
 def _match_python_set(line):
@@ -41,11 +38,11 @@ def _match_python_set(line):
     # HACK: this doesn't deal with commas or brackets that well
     entries = []
 
-    leftb = line.find('[')
-    rightb = line.rfind(']')
+    leftb = line.find("[")
+    rightb = line.rfind("]")
 
     if leftb != -1 and rightb != -1:
-        the_str = line[(leftb+1):rightb]
+        the_str = line[(leftb + 1) : rightb]
         entries = the_str.split(", ")
         # drop quotes from the sides because we're comparing with java
         result = []
@@ -79,10 +76,10 @@ def _match_largest_set(fileh):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Compare sets')
+    parser = argparse.ArgumentParser(description="Compare sets")
 
-    parser.add_argument('file1', help='File 1')
-    parser.add_argument('file2', help='File 2')
+    parser.add_argument("file1", help="File 1")
+    parser.add_argument("file2", help="File 2")
     args = parser.parse_args()
 
     with open(args.file1) as file1:
@@ -106,5 +103,5 @@ def main():
     print()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -12,24 +12,23 @@ import json
 import sys
 
 # SEPARATOR = '\t'
-SEPARATOR = ','
+SEPARATOR = ","
 
 # Grab the set of fields
 fields = OrderedDict()
 infos = []
 for line in sys.stdin:
     info = json.loads(line)
-    assert type(info) == dict, "json.loads should make a dict"
+    assert isinstance(info, dict), "json.loads should make a dict"
     for field in info.keys():
-        fields[field]=1
+        fields[field] = 1
     infos.append(info)
 
 # Print the header
 print(SEPARATOR.join(fields.keys()))
 
 # Print the lines with fields
-writer = csv.writer(sys.stdout, delimiter=',',
-                    quotechar='"', quoting=csv.QUOTE_MINIMAL)
+writer = csv.writer(sys.stdout, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
 for info in infos:
     writer.writerow([info[field] for field in fields.keys()])

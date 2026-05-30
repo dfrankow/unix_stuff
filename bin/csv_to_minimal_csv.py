@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 """Use Python's csv package to remove quotes in a csv where possible."""
+
 import csv
 import sys
 

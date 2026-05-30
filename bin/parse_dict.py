@@ -9,6 +9,7 @@ $ bin/compare_dicts.py file1 file2
 This is pretty hacky.
 It doesn't deal with some punctuation, especially quotes and commas.
 """
+
 import re
 import sys
 
@@ -26,10 +27,7 @@ def _match_dict_with(line, regex, group1, group2):
 def _match_java_dict(line):
     # Note: this matches only those dicts where the entries don't
     # contain =,{, and can be stripped.
-    return _match_dict_with(
-        line,
-        '(([^={},]+)=([^=,{}]+))+',
-        2, 3)
+    return _match_dict_with(line, "(([^={},]+)=([^=,{}]+))+", 2, 3)
 
 
 def _match_python_dict(line):
@@ -38,9 +36,8 @@ def _match_python_dict(line):
     #
     # HACK: this doesn't deal with quotes correctly
     return _match_dict_with(
-        line,
-        '(\'|")?(([^{},\'"]+)(\'|")?: (\'|")?([^,\'"{}]+)(\'|")?)+',
-        3, 6)
+        line, "('|\")?(([^{},'\"]+)('|\")?: ('|\")?([^,'\"{}]+)('|\")?)+", 3, 6
+    )
 
 
 def _match_dict(line):
@@ -63,8 +60,8 @@ def _match_largest_dict(fileh):
 
 def main():
     for key, val in _match_largest_dict(sys.stdin).items():
-        print('\t'.join([key, val]))
+        print("\t".join([key, val]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

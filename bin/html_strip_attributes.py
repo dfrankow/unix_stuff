@@ -11,5 +11,4 @@ cleaner = clean.Cleaner(safe_attrs_only=True, safe_attrs=frozenset())
 cleansed = cleaner.clean_html(document_root)
 
 pretty_print = False
-print(etree.tostring(
-    cleansed, encoding='unicode', pretty_print=pretty_print))
+print(etree.tostring(cleansed, encoding="unicode", pretty_print=pretty_print))

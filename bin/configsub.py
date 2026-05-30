@@ -1,38 +1,53 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import re
-import sys
-import yaml
+"""Read a config file and use it to substitute variables on stdin.
 
-"""Read a config file and use it to substitute variables on stdin"""
+>>> import re
+>>> _substitute("hello @NAME@", {"NAME": re.compile(r"@NAME@")}, {"NAME": "world"})
+'hello world'
+>>> _substitute("hi @A@ and @B@", {"A": re.compile(r"@A@"), "B": re.compile(r"@B@")}, {"A": "foo", "B": "bar"})
+'hi foo and bar'
+"""
 
 import argparse
+import re
+import sys
 
-parser = argparse.ArgumentParser(
-    description='Read a config file and use it to substitute variables on stdin.')
-parser.add_argument('--config', metavar='FILE',
-                    help='Config file with variables', dest='config',
-                    required=True)
-args = parser.parse_args()
+import yaml
 
-# Read the YAML config file
-# TODO(dan): Figure out what to do with nested data structures (error out?)
-config = {}
-with open(args.config) as config_file:
-    config = yaml.load(config_file)
 
-# Precompute the regex patterns, why not
-config_pattern = {}
-for var, value in config.iteritems():
-    config_pattern[var] = re.compile('@%s@' % var)
+def _substitute(line, patterns, config):
+    for var, pattern in patterns.items():
+        line = pattern.sub(str(config[var]), line)
+    return line
 
-# Substitute the pattern on stdin
-for line in sys.stdin.readlines():
-    for var, value in config.iteritems():
-        pattern = config_pattern[var]
-        line = pattern.sub(str(value), line)
-    m = re.search('@[^@]+@', line)
-    if m:
-        print >>sys.stderr, "Unsubstituted pattern: %s" % m.group(0)
-        sys.exit(1)
-    sys.stdout.write(line)
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Read a config file and use it to substitute variables on stdin."
+    )
+    parser.add_argument(
+        "--config",
+        metavar="FILE",
+        help="Config file with variables",
+        dest="config",
+        required=True,
+    )
+    args = parser.parse_args()
+
+    with open(args.config) as config_file:
+        config = yaml.safe_load(config_file)
+
+    patterns = {var: re.compile("@%s@" % var) for var in config}
+
+    for line in sys.stdin:
+        line = _substitute(line, patterns, config)
+        m = re.search("@[^@]+@", line)
+        if m:
+            print(f"Unsubstituted pattern: {m.group(0)}", file=sys.stderr)
+            sys.exit(1)
+        sys.stdout.write(line)
+
+
+if __name__ == "__main__":
+    main()
