@@ -20,6 +20,11 @@ from pathlib import Path
 
 
 TIME_RANGE_PATTERN = re.compile(r"(\d{1,2}):?(\d{0,2})\s*[-–]\s*(\d{1,2}):?(\d{0,2})")
+DATE_PATTERN = re.compile(
+    r"^(January|February|March|April|May|June|July|August|September|October|November|December|"
+    r"Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2}),?\s+(\d{4})"
+)
+SEPARATOR_PATTERN = re.compile(r"^-{10,}\s*$")
 
 
 def normalize_text_times(time_str):
@@ -56,14 +61,16 @@ def parse_time_range(time_str):
     1.0
     >>> parse_time_range('11:50-1')
     1.2
+    >>> parse_time_range('codex resume 019e21a7-9314-78a2-bda6-e6c25d8d6f9b')
     """
     time_str = time_str.strip()
     if not time_str or time_str.startswith("="):
         return None
 
     time_str = normalize_text_times(time_str)
+    if re.search(r"[a-zA-Z]", time_str):
+        return None
 
-    # Handle ranges like "9:45-1:17" or "12:35-5:44" or "11-12" (after substitution)
     match = TIME_RANGE_PATTERN.search(time_str)
     if not match:
         return None
@@ -72,6 +79,9 @@ def parse_time_range(time_str):
     start_min = int(match.group(2)) if match.group(2) else 0
     end_hour = int(match.group(3))
     end_min = int(match.group(4)) if match.group(4) else 0
+
+    if start_hour > 23 or end_hour > 23:
+        return None
 
     # Handle times that cross noon/midnight (like 9:45-1:17 means 9:45am-1:17pm)
     if end_hour < start_hour:
@@ -114,12 +124,7 @@ def parse_journal(journal_path):
     while idx < len(lines):
         line = lines[idx].strip()
 
-        # Match date lines like "April 30, 2026" or "Apr 30, 2026"
-        date_match = re.match(
-            r"^(January|February|March|April|May|June|July|August|September|October|November|December|"
-            r"Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2}),?\s+(\d{4})",
-            line,
-        )
+        date_match = DATE_PATTERN.match(line)
 
         if date_match:
             date_str = line
@@ -260,8 +265,45 @@ def create_tsv(results, output_path):
             file.write(f"{date_str}\t{day_of_week}\t{hours}\n")
 
 
+def check_journal(journal_path, results):
+    """Check for structural problems in the journal.
+
+    Returns (dates_without_hours, bare_hours_entries):
+      dates_without_hours: (line_num, date_str) tuples for date lines after a separator
+                           that have no Hours: line within the next 10 lines.
+      bare_hours_entries:  result dicts whose Hours: line is blank with no time ranges
+                           to compute from, so the script cannot fill them in.
+    """
+    with open(journal_path) as f:
+        lines = f.readlines()
+
+    dates_without_hours = []
+    prev_was_separator = False
+    for idx, raw_line in enumerate(lines):
+        line = raw_line.strip()
+        if SEPARATOR_PATTERN.match(line):
+            prev_was_separator = True
+            continue
+        if prev_was_separator and DATE_PATTERN.match(line):
+            prev_was_separator = False
+            has_hours = any(
+                lines[idx + offset].strip().startswith("Hours:")
+                for offset in range(1, 10)
+                if idx + offset < len(lines)
+            )
+            if not has_hours:
+                dates_without_hours.append((idx + 1, line))
+        elif line:
+            prev_was_separator = False
+
+    bare_hours_entries = [r for r in results if r["current_line"].strip() == "Hours:"]
+    excessive_hours_entries = [r for r in results if r["hours"] > 15]
+    return dates_without_hours, bare_hours_entries, excessive_hours_entries
+
+
 def main():
     import argparse
+    import sys
 
     parser = argparse.ArgumentParser(
         description="Parse journal hours and generate TSV with daily totals."
@@ -320,6 +362,44 @@ def main():
     print(f"\nCreated {tsv_path}")
     print(f"Total entries: {len(results)}")
     print(f"Total hours: {sum(r['hours'] for r in results)}")
+
+    # Validate: fail if any date entries are missing Hours: or any Hours: lines are still bare
+    dates_without_hours, bare_hours_entries, excessive_hours_entries = check_journal(
+        journal_path, results
+    )
+    errors = False
+    if dates_without_hours:
+        print("\n" + "=" * 60)
+        print("ERROR: date entries with no Hours: line:")
+        print("=" * 60)
+        for line_num, date_str in dates_without_hours:
+            print(f"  Line {line_num}: {date_str}")
+        errors = True
+    computable = [r for r in bare_hours_entries if r["needs_update"]]
+    uncomputable = [r for r in bare_hours_entries if not r["needs_update"]]
+    if computable:
+        print("\n" + "=" * 60)
+        print("ERROR: bare Hours: lines that journal.1 can fill in — apply it first:")
+        print("=" * 60)
+        for r in computable:
+            print(f"  Line {r['line_num'] + 1}: {r['date_str']}")
+        errors = True
+    if uncomputable:
+        print("\n" + "=" * 60)
+        print("ERROR: bare Hours: lines with no time ranges to compute from:")
+        print("=" * 60)
+        for r in uncomputable:
+            print(f"  Line {r['line_num'] + 1}: {r['date_str']}")
+        errors = True
+    if excessive_hours_entries:
+        print("\n" + "=" * 60)
+        print("ERROR: days with more than 15 hours:")
+        print("=" * 60)
+        for r in excessive_hours_entries:
+            print(f"  Line {r['line_num'] + 1}: {r['date_str']} ({r['hours']} hours)")
+        errors = True
+    if errors:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
