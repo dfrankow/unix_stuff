@@ -1,11 +1,11 @@
 ---
 name: squash-commit-message
-description: Generate a squash-merge commit message for GitHub by analyzing all commit messages since a base branch
+description: Generate a timeless squash-merge commit message for GitHub by analyzing all commit messages since a base branch
 ---
 
 # Squash Commit Message Generator
 
-Generate a commit message suitable for GitHub squash-merge by analyzing all commit messages since a base branch.
+Generate a timeless commit message suitable for GitHub squash-merge by analyzing all commit messages since a base branch.  By "timeless" I mean something that describes only those things we'll still be interested in a year from now.
 
 ## Usage
 - `/squash-commit-message` - uses "main" as base branch
