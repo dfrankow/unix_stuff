@@ -238,9 +238,6 @@ def update_journal(output_path, results, lines):
         if result["needs_update"]:
             line_num = result["line_num"]
             new_line = format_hours_line(result["hours_list"])
-            print(f"\nLine {line_num + 1} ({result['date_str']}):")
-            print(f"  Current: {result['current_line']}")
-            print(f"  New:     {new_line}")
             lines[line_num] = new_line + "\n"
             updates_made += 1
 
@@ -315,86 +312,43 @@ def main():
     tsv_path = journal_path.parent / "hours.tsv"
     updated_journal_path = journal_path.parent / (journal_path.name + ".1")
 
-    # Parse journal
-    print(f"Parsing {journal_path}...")
     results, lines = parse_journal(journal_path)
 
-    print(f"Found {len(results)} date entries with Hours:")
-
-    # Show all parsed dates and hours
-    print("\n" + "=" * 60)
-    print("Parsed dates and hours:")
-    print("=" * 60)
-    for result in results:
-        date_str = result["date"].strftime("%Y-%m-%d %A")
-        hours = result["hours"]
-        update_marker = " [NEEDS UPDATE]" if result["needs_update"] else ""
-        print(f"{date_str}\t{hours}{update_marker}")
-
-    # Show what will be updated and create new journal
-    print("\n" + "=" * 60)
-    print("Updates to be made:")
-    print("=" * 60)
+    pending = [r for r in results if r["needs_update"]]
     updates = update_journal(updated_journal_path, results, lines)
 
     if updates == 0:
-        print("No updates needed - all Hours: lines already have totals")
-        print("\nNot creating updated journal since no changes needed")
+        print("No updates needed.")
     else:
-        print(f"\nCreated {updated_journal_path} with {updates} updated Hours: lines")
+        print(f"Updated Hours: for {updates} dates:")
+        for r in pending:
+            print(f"  {r['date_str']}: {r['hours']}")
+        print(f"diff {journal_path} {updated_journal_path}")
+        print(f"mv {updated_journal_path} {journal_path}")
 
-        # Verify file sizes
-        orig_size = journal_path.stat().st_size
-        new_size = updated_journal_path.stat().st_size
-        print(f"\nOriginal journal: {orig_size:,} bytes")
-        print(f"Updated journal:  {new_size:,} bytes")
-
-        if new_size < orig_size:
-            print(
-                f"WARNING: Updated journal is smaller by {orig_size - new_size:,} bytes!"
-            )
-
-        print(f"\nTo review changes: diff {journal_path} {updated_journal_path}")
-        print(f"To apply changes:  mv {updated_journal_path} {journal_path}")
-
-    # Create TSV
     create_tsv(results, tsv_path)
-    print(f"\nCreated {tsv_path}")
-    print(f"Total entries: {len(results)}")
-    print(f"Total hours: {sum(r['hours'] for r in results)}")
+    print(
+        f"{tsv_path}: {len(results)} entries, {sum(r['hours'] for r in results)} total hours"
+    )
 
-    # Validate: fail if any date entries are missing Hours: or any Hours: lines are still bare
+    # Validate: fail on genuine problems only
     dates_without_hours, bare_hours_entries, excessive_hours_entries = check_journal(
         journal_path, results
     )
     errors = False
     if dates_without_hours:
-        print("\n" + "=" * 60)
         print("ERROR: date entries with no Hours: line:")
-        print("=" * 60)
         for line_num, date_str in dates_without_hours:
             print(f"  Line {line_num}: {date_str}")
         errors = True
-    computable = [r for r in bare_hours_entries if r["needs_update"]]
     uncomputable = [r for r in bare_hours_entries if not r["needs_update"]]
-    if computable:
-        print("\n" + "=" * 60)
-        print("ERROR: bare Hours: lines that journal.1 can fill in — apply it first:")
-        print("=" * 60)
-        for r in computable:
-            print(f"  Line {r['line_num'] + 1}: {r['date_str']}")
-        errors = True
     if uncomputable:
-        print("\n" + "=" * 60)
         print("ERROR: bare Hours: lines with no time ranges to compute from:")
-        print("=" * 60)
         for r in uncomputable:
             print(f"  Line {r['line_num'] + 1}: {r['date_str']}")
         errors = True
     if excessive_hours_entries:
-        print("\n" + "=" * 60)
         print("ERROR: days with more than 15 hours:")
-        print("=" * 60)
         for r in excessive_hours_entries:
             print(f"  Line {r['line_num'] + 1}: {r['date_str']} ({r['hours']} hours)")
         errors = True
