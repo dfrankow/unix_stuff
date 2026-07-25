@@ -7,6 +7,11 @@
     co = checkout
     gone = "!f() { git fetch -p && git branch -vv | grep \": gone]\" | awk \"{print \\$1}\"; }; f"
     rm-gone = "!f() { git gone | while read branch_name; do git branch -D \"$branch_name\"; done; }; f"
+    # Enables blame.ignoreRevsFile only when .git-blame-ignore-revs exists at
+    # the repo's top level. Plain `git blame` fails fatally if that config
+    # points at a file that doesn't exist, so repos without one don't need a
+    # dummy empty file just to avoid breaking blame.
+    blame = "!f() { root=$(git rev-parse --show-toplevel 2>/dev/null); if [ -n \"$root\" ] && [ -f \"$root/.git-blame-ignore-revs\" ]; then git -c alias.blame= -c blame.ignoreRevsFile=.git-blame-ignore-revs blame \"$@\"; else git -c alias.blame= blame \"$@\"; fi; }; f"
 
 [push]
     # Without this, git is chatty
