@@ -24,14 +24,17 @@ This file consolidates reusable guidance for AI coding agents (Claude, Codex, an
 ### Comments
 - **Don't leak implementation details** - Comments should not describe HOW a function works internally. Implementation details belong in the function's documentation comment, not scattered throughout the codebase.
 - **I prefer top-comments to side-comments**
-- **Make comments timeless** - should still be relevant in six months, not likely to go stale
+- **Make comments timeless** - should still be relevant in six months, not likely to go stale. If a detail really is time-sensitive, date it explicitly ("June 2026: we reduced workers to 1 because...") so a future reader knows it may no longer apply.
 - **Don't add comments with magic numbers that are likely to go out of date**
 - **Default to writing no comments** - write one only when the WHY is non-obvious
 - **Don't write task-specific comments** - write for tomorrow, not today
+- **Describe this code, not the rest of the system** - a comment explains what it sits near. Describing behavior that lives elsewhere means that code can change and nothing points back here to say the comment is now wrong. Narrative that ties parts together is sometimes worth writing, but it should be rare and belong somewhere central - a module docstring, a README - not scattered where it will silently rot.
 
 ### Documentation Comments (docstrings / Javadoc)
 - **Don't reveal most internal implementation details** - the implementation might change
 - **Write documentation that will still be relevant in a week** - leave out today's information if it's not relevant long-term
+- **Say it once** - a constraint belongs in one canonical place, with everything else pointing there. The same hazard explained in a docstring, its mirror in another language, and the README is three copies to keep true.
+- **When trimming, cut restatement, not facts** - the chatty pattern is fact → why it matters → dramatized consequence. Keep the fact, usually keep the why, always cut the third. Shortening by deleting the fact and keeping the framing makes the doc worse, not shorter.
 
 ### Constants and Symbols
 - **Use the symbol, not the constant** - If there is an enum or constant, don't copy its value, use the symbol. That helps tie code together.
@@ -65,6 +68,7 @@ When a linter flags a problem, discuss whether to:
 
 ### Other
 - **Never modify sys.path** - assume PYTHONPATH is set correctly
+- **Don't use `from __future__ import annotations`** unless the project is on Python < 3.12 and you actually need it
 
 ## Java-Specific Style
 
@@ -98,11 +102,14 @@ Examples:
 - **Never git commit files without asking me first**
 
 ### File Operations
+- **Never `git add .` or `git add -A`** - it sweeps up junk. Name the files you want.
+- **`git add` new files as soon as you create them** - don't wait until commit time
 - **If you change the name of a file, use `git mv`**
 - **Don't remove the executable bit from scripts**
 - **Never use `git rm` on `.idea/`, `.vscode/`, or similar IDE dirs**
 
 ### Branches and Deployment
+- **Large datasets belong in Git LFS**, under a dedicated directory (e.g. `data/`)
 - **Try to create new commits rather than amending** unless explicitly requested
 - **Before destructive operations, consider safer alternatives**
 - **Never skip hooks or bypass signing** unless explicitly asked
@@ -156,6 +163,9 @@ Project = lv360
 If you don't use those tags on resources, you may get strange errors.
 
 ## Code Organization Philosophy
+
+**Less code is better:**
+- Prefer an existing package, or an existing reusable function or class, to writing new code
 
 **Favor leaner code:**
 - Less task-specific comments and prints
