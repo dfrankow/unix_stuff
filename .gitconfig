@@ -5,7 +5,9 @@
 
 [alias]
     co = checkout
-    gone = "!f() { git fetch -p && git branch -vv | grep \": gone]\" | awk \"{print \\$1}\"; }; f"
+    # --format, not `branch -vv`, so the "* " / "+ " marker on the current or a
+    # worktree branch is never mistaken for the branch name.
+    gone = "!f() { git fetch -p && git branch --format=\"%(refname:short) %(upstream:track)\" | awk '$2==\"[gone]\"{print $1}'; }; f"
     rm-gone = "!f() { git gone | while read branch_name; do git branch -D \"$branch_name\"; done; }; f"
     # Enables blame.ignoreRevsFile only when .git-blame-ignore-revs exists at
     # the repo's top level. Plain `git blame` fails fatally if that config
