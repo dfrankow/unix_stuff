@@ -8,7 +8,8 @@ This file consolidates reusable guidance for AI coding agents (Claude, Codex, an
 - **Avoid one-letter variable names** - prefer "err" instead of "e", "idx" instead of "i", "jdx" instead of j
 
 ### Function Design
-- **No default parameters** - Defaults belong at the outer layer (argparse, config files) where they're visible and easily changed. Inner functions receive explicit values.
+- **No default parameters** - Defaults belong at the outer layer (argparse, config files) where they're visible and easily changed. Inner functions receive explicit values. If one is genuinely wanted (dependency injection for tests, say), raise it rather than adding it quietly.
+- **Type-hint arguments and return values**
 - **Use as few return statements as possible** - Ideally 0 or 1
 - **Avoid private members unless absolutely necessary** - propose plans to make public interfaces or new functions instead
 
@@ -21,6 +22,9 @@ This file consolidates reusable guidance for AI coding agents (Claude, Codex, an
 ### Assertions
 - **If you always expect something to be true due to code structure, assert it** rather than if-check it
 
+### Data Sources
+- **No fallback to a less reliable source unless we agree it's worthwhile** - prefer no data over bad data. A silent fallback looks like a normal answer, so stale or guessed values pass unnoticed. Fail, or name the source in the output.
+
 ### Comments
 - **Don't leak implementation details** - Comments should not describe HOW a function works internally. Implementation details belong in the function's documentation comment, not scattered throughout the codebase.
 - **I prefer top-comments to side-comments**
@@ -28,6 +32,7 @@ This file consolidates reusable guidance for AI coding agents (Claude, Codex, an
 - **Don't add comments with magic numbers that are likely to go out of date**
 - **Default to writing no comments** - write one only when the WHY is non-obvious
 - **Don't write task-specific comments** - write for tomorrow, not today
+- **Don't refer to files unavailable from the repo you're in** - scratch notes outside git, or docs in another checkout. A path the reader can't open is dead weight; spell out the rule instead of pointing at it.
 - **Describe this code, not the rest of the system** - a comment explains what it sits near. Describing behavior that lives elsewhere means that code can change and nothing points back here to say the comment is now wrong. Narrative that ties parts together is sometimes worth writing, but it should be rare and belong somewhere central - a module docstring, a README - not scattered where it will silently rot.
 
 ### Documentation Comments (docstrings / Javadoc)
