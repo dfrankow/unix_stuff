@@ -156,21 +156,14 @@ Examples:
 ### Testing
 - **Test organization**: Follow Django conventions - `app/foo.py` should be tested by `app/tests/test_foo.py`
 
-## AWS Operations (if applicable)
-
-**Resource tagging (required):**
-Most AWS projects at Lime require these tags:
-```
-Team = Perception
-Project = lv360
-```
-
-If you don't use those tags on resources, you may get strange errors.
-
 ## Code Organization Philosophy
 
 **Less code is better:**
 - Prefer an existing package, or an existing reusable function or class, to writing new code
+
+**Splitting an over-long file:**
+- Don't carve off a small chunk to squeak under a limit — find a seam that halves the file and split there
+- Do it as its own PR with no functionality changes, so it reviews as a pure move
 
 **Favor leaner code:**
 - Less task-specific comments and prints
