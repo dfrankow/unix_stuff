@@ -165,6 +165,7 @@ Examples:
 
 ## Shell and Environment
 
+- **Change files with the Edit/Write tools, never through the shell** (`sed`, heredocs, inline `python`), whatever the current mode says - a scripted edit shows only its own source, not the resulting diff, so a replacement that matches too much or too little lands unreviewed
 - **No "timeout" command on macOS** - it doesn't exist
 - **Put temporary files in `tmp/DATE`** where DATE is MMDD or YYYYMMDD
 - **If a debugging tool will be generally useful, put it in `bin/`**
