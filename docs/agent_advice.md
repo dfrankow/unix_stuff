@@ -123,6 +123,8 @@ When a linter flags a problem, discuss whether to:
 - **Don't waste time eliminating extra imports** - ruff will take care of them
 - **Run ruff**: `pre-commit run ruff-check --all-files`
 - **Run all pre-commit hooks**: `pre-commit run --all-files`
+- **Don't run `pre-commit` by hand** - committing runs it
+- **Run the tests once, straight after committing** - amend if they fail, which is the uncommon case
 
 ## Testing
 
@@ -150,6 +152,9 @@ Examples:
 
 ### Commit Messages
 - **No "Co-Authored-By" or "Generated with" or Claude icon** - it's like an ad
+
+### Repository State
+- **Ask git before saying what is pushed, merged or committed** - `git ls-remote`, `git status`, `git log`. A summary or an earlier turn says what was true then
 
 ### Committing
 - **Never git commit files without asking me first**
