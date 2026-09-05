@@ -54,11 +54,17 @@ FORBIDDEN_COMMIT_WORDS=(
 #     return 0
 # }
 
+# Helper names here avoid a leading underscore so that coding agents get the
+# guards too: Claude Code replays a snapshot of these functions in each of its
+# shells, and it drops names starting with '_' as zsh completion functions. A
+# helper it drops still parses at the call site below, so the guard fails open -
+# it prints "command not found" and skips the check.
+#
 # Succeed when a git command creates a branch, printing the start point it would
 # branch from (empty means from HEAD). Fails when the command creates nothing.
 # 'git branch <name> <start>' creates one without any flag, so the positional
 # count decides that case.
-_agent_branch_start_point() {
+agent_branch_start_point() {
     local subcommand="$1"
     shift
     local making_branch=false
@@ -85,7 +91,7 @@ _agent_branch_start_point() {
 # Branching from a remote-tracking ref sets the new branch's upstream to it, so a
 # later bare 'git push' targets that remote branch. Git's own suggested fix for
 # the resulting name mismatch pushes straight to main.
-_agent_reject_remote_start_point() {
+agent_reject_remote_start_point() {
     local start_point="$1"
     # Unquoted below on purpose; see the bash/zsh note at the top of the file.
     local remote_main_re='^[A-Za-z0-9._-]+/(main|master)$'
@@ -106,7 +112,7 @@ _agent_reject_remote_start_point() {
 # The reason to reach for origin/main is that local main goes stale, so a stale
 # base has to be caught too, or forbidding the remote ref just trades one bug for
 # another. An empty start point means branching from HEAD, which is checked too.
-_agent_reject_stale_start_point() {
+agent_reject_stale_start_point() {
     local base="${1:-HEAD}"
 
     if [ "$base" = "HEAD" ]; then
@@ -161,9 +167,9 @@ git() {
     # remote-tracking ref.
     if [ "$1" = "checkout" ] || [ "$1" = "switch" ] || [ "$1" = "branch" ]; then
         local start_point
-        if start_point=$(_agent_branch_start_point "$@"); then
-            _agent_reject_remote_start_point "$start_point" || return 1
-            _agent_reject_stale_start_point "$start_point" || return 1
+        if start_point=$(agent_branch_start_point "$@"); then
+            agent_reject_remote_start_point "$start_point" || return 1
+            agent_reject_stale_start_point "$start_point" || return 1
         fi
     fi
 

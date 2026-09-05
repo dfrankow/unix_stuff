@@ -12,6 +12,8 @@ This file consolidates reusable guidance for AI coding agents (Claude, Codex, an
 - **Default to writing no comments** - write one only when the WHY is non-obvious
 - **Don't write task-specific comments** - write for tomorrow, not today
 - **Don't refer to files unavailable from the repo you're in** - scratch notes outside git, `tmp/` files, or docs in another checkout. A path the reader can't open is dead weight; spell out the rule instead of pointing at it. This applies equally to a write-up meant as a public report, such as one attached to an issue tracker card; attach the underlying data files if reviewers need them. The rule is directional: an uncommitted doc may point at a committed one, never the reverse
+- **Verify a "because" before writing it** - a reason that names other code is a claim about that code, so go read it first. Asserting that some downstream step needs a field, when nothing there reads it, is a reason invented to fill the slot. An unverified reason is worse than none, since a comment is exactly where a reader stops checking. Give the reason you can confirm, or none.
+- **If one rewrite does not land, stop rewording** - a reader who still does not understand is missing a fact or has caught a false one, and the third phrasing of a wrong claim is still wrong. Ask what they think the sentence says, or go verify the claim.
 - **Describe this code, not the rest of the system** - a comment explains what it sits near. Describing behavior that lives elsewhere means that code can change and nothing points back here to say the comment is now wrong. Narrative that ties parts together is sometimes worth writing, but it should be rare and belong somewhere central - a module docstring, a README - not scattered where it will silently rot.
 
 ### Documentation Comments (docstrings / Javadoc)
@@ -21,7 +23,8 @@ This file consolidates reusable guidance for AI coding agents (Claude, Codex, an
 - **When trimming, cut restatement, not facts** - the chatty pattern is fact → why it matters → dramatized consequence. Keep the fact, usually keep the why, always cut the third. Shortening by deleting the fact and keeping the framing makes the doc worse, not shorter.
 
 ### Phrasing
-- **Explain why in the shape "X does Y so that Z"** - X is on the screen, Z is a good outcome. Not "a backbone that did not name itself would collide", which asks the reader to picture a system that does not exist. A sentence that will not fit the shape is one the writer does not understand yet.
+- **Explain why in the shape "X does Y so that Z"** - X is on the screen, Z is a good outcome. Not "a backbone that did not name itself would collide", which asks the reader to picture a system that does not exist. A sentence that will not fit the shape is one the writer does not understand yet. The usual failure is starting at Z: the fact about the world arrives first and the reader has to work back to which line it describes.
+- **When a filter picks one value, say why not the adjacent one** - a reader who sees one enum value named asks why the neighbour was not, and rewording the first half never reaches that question.
 - **Favor positive phrasing over negative** - it reads faster. "Skips annotations that label a whole video", not "does not include annotations that lack frame bounds".
 
 ## Communication Style
