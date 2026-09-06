@@ -154,7 +154,7 @@ Examples:
 - **No "Co-Authored-By" or "Generated with" or Claude icon** - it's like an ad
 
 ### Repository State
-- **Ask git before saying what is pushed, merged or committed** - `git ls-remote`, `git status`, `git log`. A summary or an earlier turn says what was true then
+- **Ask git before saying what is pushed, merged, committed or still uncommitted** - `git ls-remote`, `git status`, `git log`. A summary or an earlier turn says what was true then, and someone else may have committed since
 
 ### Committing
 - **Never git commit files without asking me first**
