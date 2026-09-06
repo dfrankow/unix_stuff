@@ -27,3 +27,7 @@ description: ALWAYS use this skill when committing code. Triggers on any commit 
 - NEVER "git add -A" or "git add ." since that might add too many files
 - Do "git commit ." or "git add -u" instead of always adding each file separately.  You only have to "git add" untracked files that should be in the commit.
 - Before committing, run "git status" and check the untracked-files list for anything that belongs in this change (new migrations, new modules, new test files, etc.) — "git commit ." / "git add -u" only stage modifications to already-tracked files, so a new file you just created will silently NOT be included unless you "git add" it explicitly. After the commit, run "git status" again to confirm nothing relevant was left out.
+
+### What to report afterwards
+- The commit hash and whether the tree is clean, and nothing else. **No remote state** — unpushed counts, whether to push, where origin is — and no news about other repos. Nothing here printed those, so they would be recalled rather than checked, and they go stale as soon as anyone else pushes.
+- Asked about any of it? Run "git status -sb" or "git ls-remote" first, and quote what it printed.
