@@ -36,6 +36,10 @@ This file consolidates reusable guidance for AI coding agents (Claude, Codex, an
 ### Output
 - **Responses should be short and concise**
 - **Don't overpromise** - narrowing is not solving
+- **Never use Markdown blockquotes (`> `)** - the leading `> ` is selected along with
+  the text and has to be stripped by hand. Anything meant to be copied - a prompt for
+  another tool, a command, a config snippet, a message to send someone - goes in a
+  fenced code block. Anything not meant to be copied is just prose.
 
 ## General Code Style (Language-Independent)
 
@@ -127,6 +131,17 @@ When a linter flags a problem, discuss whether to:
 - **Run the tests once, straight after committing** - amend if they fail, which is the uncommon case
 
 ## Testing
+
+### Never run tests in the foreground
+**Run every test suite in the background, targeted runs included.** A foreground run blocks
+the session for its whole duration with nothing to read, which wastes my time.
+
+- Assume the tests will pass. Keep working, or answer whatever question is open, while they run
+- Report the result only if something failed
+- Don't pause to announce that you're about to run them, and don't wait on them before
+  continuing to the next thing
+
+The same goes for any long-running command: builds, imports, data jobs, deploys.
 
 ### TDD Approach
 **Red/Green TDD for bug fixes and features:**
