@@ -136,7 +136,52 @@ agent_reject_stale_start_point() {
     return 0
 }
 
+AGENT_FORBIDDEN_ATTRIBUTION="Generated with [Claude Code]"
+
+# Fails when a message or body carries the agent's advertising line, whether it
+# is passed inline or in a file named by -F, --file or --body-file.
+agent_reject_attribution() {
+    local next_is_file=false
+    local file found
+
+    for arg in "$@"; do
+        file=""
+        found=false
+        if [ "$next_is_file" = "true" ]; then
+            file="$arg"
+            next_is_file=false
+        fi
+        case "$arg" in
+            -F|--file|--body-file) next_is_file=true ;;
+            --file=*|--body-file=*) file="${arg#*=}" ;;
+        esac
+
+        # The quotes make the brackets literal; unquoted they are a glob class.
+        case "$arg" in
+            *"$AGENT_FORBIDDEN_ATTRIBUTION"*) found=true ;;
+        esac
+        if [ -f "$file" ] && grep -qF "$AGENT_FORBIDDEN_ATTRIBUTION" "$file"; then
+            found=true
+        fi
+
+        if [ "$found" = "true" ]; then
+            echo "🚫 BLOCKED: message contains '$AGENT_FORBIDDEN_ATTRIBUTION'"
+            echo "   From CLAUDE.md: no 'Generated with' or Co-Authored-By lines - it's like an ad"
+            return 1
+        fi
+    done
+
+    return 0
+}
+
+gh() {
+    agent_reject_attribution "$@" || return 1
+    command gh "$@"
+}
+
 git() {
+    agent_reject_attribution "$@" || return 1
+
     # Check for --no-verify flag anywhere in arguments
     for arg in "$@"; do
         if [ "$arg" = "--no-verify" ]; then

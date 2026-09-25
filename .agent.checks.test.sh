@@ -168,6 +168,21 @@ echo "git push"
 # The suite always runs without a tty, which is the case the guard is aimed at.
 expect_block "git push (non-interactive)"  git push
 
+echo "attribution"
+attribution="Fix it
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+attribution_file="$(dirname "$repo")/attribution.txt"
+printf '%s\n' "$attribution" > "$attribution_file"
+expect_block "git commit -m <attribution>"         git commit --dry-run -m "$attribution"
+expect_block "git commit -F <attribution file>"    git commit --dry-run -F "$attribution_file"
+expect_block "git commit --file=<attribution>"     git commit --dry-run --file="$attribution_file"
+expect_block "gh pr create --body <attribution>"   gh pr create --body "$attribution"
+expect_block "gh pr create --body=<attribution>"   gh pr create --body="$attribution"
+expect_block "gh pr edit --body-file <file>"       gh pr edit 1 --body-file "$attribution_file"
+refute_block "git commit -m 'Generated with care'" git commit --dry-run -m "Generated with care"
+refute_block "gh --version"                        gh --version
+
 echo "pip"
 expect_block "pip install requests"           pip install requests
 refute_block "pip install -r requirements"    pip install -r /dev/null
