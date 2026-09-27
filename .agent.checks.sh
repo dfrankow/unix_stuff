@@ -136,11 +136,14 @@ agent_reject_stale_start_point() {
     return 0
 }
 
-AGENT_FORBIDDEN_ATTRIBUTION="Generated with [Claude Code]"
-
 # Fails when a message or body carries the agent's advertising line, whether it
 # is passed inline or in a file named by -F, --file or --body-file.
+#
+# The forbidden line is a local rather than a global so that the guard works in
+# Claude Code's shells: its snapshot replays functions but not variables, and an
+# empty pattern would match every argument and block every git command.
 agent_reject_attribution() {
+    local forbidden="Generated with [Claude Code]"
     local next_is_file=false
     local file found
 
@@ -158,14 +161,14 @@ agent_reject_attribution() {
 
         # The quotes make the brackets literal; unquoted they are a glob class.
         case "$arg" in
-            *"$AGENT_FORBIDDEN_ATTRIBUTION"*) found=true ;;
+            *"$forbidden"*) found=true ;;
         esac
-        if [ -f "$file" ] && grep -qF "$AGENT_FORBIDDEN_ATTRIBUTION" "$file"; then
+        if [ -f "$file" ] && grep -qF "$forbidden" "$file"; then
             found=true
         fi
 
         if [ "$found" = "true" ]; then
-            echo "🚫 BLOCKED: message contains '$AGENT_FORBIDDEN_ATTRIBUTION'"
+            echo "🚫 BLOCKED: message contains '$forbidden'"
             echo "   From CLAUDE.md: no 'Generated with' or Co-Authored-By lines - it's like an ad"
             return 1
         fi
