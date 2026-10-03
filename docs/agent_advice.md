@@ -5,20 +5,17 @@ This file consolidates reusable guidance for AI coding agents (Claude, Codex, an
 ## Writing (Comments, Docstrings, Docs)
 
 ### Comments
-- **Don't leak implementation details** - a comment should not describe HOW something works internally, nor how a value happened to be produced. That belongs in the documentation comment, not scattered through the codebase. Same for a doc in `docs/`: say what to run and what judgment the reader brings, not a script's flags, prompts, or output - `--help` covers those
+- **Don't leak implementation details** - a comment or docstring says what the code does and why, not how it works internally or how a value happened to be produced, so that it stays true when the implementation changes. Same for a doc in `docs/`: say what to run and what judgment the reader brings, not a script's flags, prompts, or output - `--help` covers those
 - **I prefer top-comments to side-comments**
-- **Make comments timeless** - should still be relevant in six months, not likely to go stale. If a detail really is time-sensitive, date it explicitly ("June 2026: we reduced workers to 1 because...") so a future reader knows it may no longer apply.
+- **Make comments and docs timeless** - write for tomorrow, not today's task; a comment should still be relevant in six months. If a detail really is time-sensitive, date it explicitly ("June 2026: we reduced workers to 1 because...") so a future reader knows it may no longer apply.
 - **Don't add comments with magic numbers that are likely to go out of date**
 - **Default to writing no comments** - write one only when the WHY is non-obvious
-- **Don't write task-specific comments** - write for tomorrow, not today
 - **Don't refer to files unavailable from the repo you're in** - scratch notes outside git, `tmp/` files, or docs in another checkout. A path the reader can't open is dead weight; spell out the rule instead of pointing at it. This applies equally to a write-up meant as a public report, such as one attached to an issue tracker card; attach the underlying data files if reviewers need them. The rule is directional: an uncommitted doc may point at a committed one, never the reverse
 - **Verify a "because" before writing it** - a reason that names other code is a claim about that code, so go read it first. Asserting that some downstream step needs a field, when nothing there reads it, is a reason invented to fill the slot. An unverified reason is worse than none, since a comment is exactly where a reader stops checking. Give the reason you can confirm, or none.
 - **If one rewrite does not land, stop rewording** - a reader who still does not understand is missing a fact or has caught a false one, and the third phrasing of a wrong claim is still wrong. Ask what they think the sentence says, or go verify the claim.
 - **Describe this code, not the rest of the system** - a comment explains what it sits near. Describing behavior that lives elsewhere means that code can change and nothing points back here to say the comment is now wrong. Narrative that ties parts together is sometimes worth writing, but it should be rare and belong somewhere central - a module docstring, a README - not scattered where it will silently rot.
 
 ### Documentation Comments (docstrings / Javadoc)
-- **Don't reveal most internal implementation details** - the implementation might change
-- **Write documentation that will still be relevant in a week** - leave out today's information if it's not relevant long-term
 - **Say it once** - a constraint belongs in one canonical place, with everything else pointing there. The same hazard explained in a docstring, its mirror in another language, and the README is three copies to keep true.
 - **When trimming, cut restatement, not facts** - the chatty pattern is fact → why it matters → dramatized consequence. Keep the fact, usually keep the why, always cut the third. Shortening by deleting the fact and keeping the framing makes the doc worse, not shorter.
 
@@ -36,6 +33,10 @@ This file consolidates reusable guidance for AI coding agents (Claude, Codex, an
 ### Output
 - **Responses should be short and concise**
 - **Don't overpromise** - narrowing is not solving
+- **Look before asserting the state of anything outside the conversation** - whether a
+  command was run, a file exists, a result is current. Handing someone a command is not
+  knowing they ran it, and an earlier turn says what was true then. For git state, see
+  Repository State below
 - **Never use Markdown blockquotes (`> `)** - the leading `> ` is selected along with
   the text and has to be stripped by hand. Anything meant to be copied - a prompt for
   another tool, a command, a config snippet, a message to send someone - goes in a
@@ -56,8 +57,7 @@ This file consolidates reusable guidance for AI coding agents (Claude, Codex, an
 - **For computer-to-computer interfaces (APIs, functions), be intolerant** - it finds bugs more quickly
 
 ### Exception Handling
-- **Avoid broad exceptions** - catching "except Exception" (or Java's `catch (Exception e)`) is almost always wrong. Just let exceptions raise so we can detect errors.
-- **If we don't expect the code to fail, just let exceptions raise**
+- **Avoid broad exceptions** - catching "except Exception" (or Java's `catch (Exception e)`) is almost always wrong. If we don't expect the code to fail, just let exceptions raise so we can detect errors.
 - **If there is an expected exception case, do an if check if possible**
 - **If not, use a narrower exception class**
 
@@ -80,8 +80,6 @@ This file consolidates reusable guidance for AI coding agents (Claude, Codex, an
 - Do it as its own PR with no functionality changes, so it reviews as a pure move
 
 **Favor leaner code:**
-- Less task-specific comments and prints
-- Write for tomorrow, not just today's task
 - You have a tendency to write too much code that's too specific to the current moment
 - Keep functions and modules focused on their core responsibility
 - **Favor simplicity over backward compatibility** when you control the entire codebase and there are no external clients depending on it
@@ -124,13 +122,16 @@ When a linter flags a problem, discuss whether to:
 - Suppress with justification (rare cases where the rule doesn't apply)
 
 ### Python (Ruff/Pylint)
-- **Don't waste time eliminating extra imports** - ruff will take care of them
-- **Run ruff**: `pre-commit run ruff-check --all-files`
-- **Run all pre-commit hooks**: `pre-commit run --all-files`
 - **Don't run `pre-commit` by hand** - committing runs it
-- **Run the tests once, straight after committing** - amend if they fail, which is the uncommon case
 
 ## Testing
+
+### Run the suite once per finished change
+Not after every edit. During TDD, run only the test you are writing; save the full suite
+for the end. A run that started before your latest edit reports on code that no
+longer exists, so its result is noise, and reacting to it pulls you off the work in hand.
+Fix a failure in a follow-up commit; the pre-commit hooks are the gate, so don't hold a
+commit for a test run.
 
 ### Never run tests in the foreground
 **Run every test suite in the background, targeted runs included.** A foreground run blocks
@@ -140,6 +141,10 @@ the session for its whole duration with nothing to read, which wastes my time.
 - Report the result only if something failed
 - Don't pause to announce that you're about to run them, and don't wait on them before
   continuing to the next thing
+- Don't poll a backgrounded run (an `until grep ... done` loop over its output, say).
+  Read the output when the task notification arrives
+- Redirect a suite's output to a file rather than piping it through `grep`, `tail` or
+  `head`, so that the exit code is the suite's and not the pipe's
 
 The same goes for any long-running command: builds, imports, data jobs, deploys.
 
@@ -173,8 +178,7 @@ Examples:
 
 ### Committing
 - **Never git commit files without asking me first**
-- **Never use `git --no-verify`** - don't skip hooks without explicit request
-- **Never skip hooks or bypass signing** unless explicitly asked
+- **Never skip hooks (`git --no-verify`) or bypass signing** unless explicitly asked
 - **Try to create new commits rather than amending** unless explicitly requested
 - **Before destructive operations, consider safer alternatives**
 
