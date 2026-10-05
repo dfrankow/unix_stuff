@@ -5,7 +5,7 @@ description: Review someone else's pull request - gather its current state, read
 
 # Reviewing someone else's pull request
 
-Reviewing another person's PR, not your own uncommitted work (that is `/lime:local-review`).
+Reviewing another person's PR, not your own uncommitted work.
 The author owns the fix; you own naming the problem clearly and being right about it.
 
 ## 1. Get the current state before saying anything about it
@@ -15,7 +15,7 @@ comments and merges between turns.
 
 ```bash
 gh pr view <n> --json number,title,state,isDraft,author,baseRefName,headRefName,reviewDecision,reviews,mergeable,additions,deletions,changedFiles,updatedAt,body
-gh api repos/limebike/<repo>/pulls/<n>/comments   # inline threads
+gh api 'repos/{owner}/{repo}/pulls/<n>/comments'   # inline threads
 ```
 
 `reviewDecision` only ever reads APPROVED, CHANGES_REQUESTED or REVIEW_REQUIRED. A comment-only
@@ -24,8 +24,6 @@ review leaves it at REVIEW_REQUIRED, so it never means "nobody has reviewed this
 
 Read existing review threads before writing your own points, so you don't repeat a point someone
 already made or one the author already answered.
-
-Only look at repos under `limebike`.
 
 ## 2. Read the diff, and check the description against it
 

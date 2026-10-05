@@ -1,7 +1,5 @@
 # General AI Coding Agent Advice (Project-Agnostic)
 
-This file consolidates reusable guidance for AI coding agents (Claude, Codex, and others) across projects. Copy relevant sections into project-specific instruction files (e.g. `CLAUDE.md`, `AGENTS.md`) as needed.
-
 ## Writing (Comments, Docstrings, Docs)
 
 ### Comments
@@ -104,10 +102,6 @@ This file consolidates reusable guidance for AI coding agents (Claude, Codex, an
 - **When JS needed**: Use htmx first, custom JavaScript only as last resort.
 - **Architecture**: Server-side rendering, standard HTML forms, progressive enhancement.
 
-## Java-Specific Style
-
-*(no conventions recorded yet - add here as they come up)*
-
 ## Linting and Code Quality
 
 ### General Principle
@@ -183,11 +177,9 @@ Examples:
 - **Before destructive operations, consider safer alternatives**
 
 ### File Operations
-- **Never `git add .` or `git add -A`** - it sweeps up junk. Name the files you want.
 - **`git add` new files as soon as you create them** - don't wait until commit time
 - **If you change the name of a file, use `git mv`**
 - **Don't remove the executable bit from scripts**
-- **Never use `git rm` on `.idea/`, `.vscode/`, or similar IDE dirs**
 - **Large datasets belong in Git LFS**, under a dedicated directory (e.g. `data/`)
 
 ## Shell and Environment

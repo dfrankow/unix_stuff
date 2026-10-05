@@ -32,7 +32,6 @@ Follow git-commit skill rules:
 - **Be specific** - mention key files/classes that changed
 - **No fluff** - no "comprehensive", "enhance", "streamline"
 - **Factual only** - what changed, not how great it is
-- **No attribution** - no "Co-Authored-By" or similar
 
 ## Output
 Write the final message to `tmp/squash-commit-message.txt`, creating `tmp/` if needed.
@@ -48,5 +47,3 @@ comment about it.
 
 **Available branches:**
 !`git branch -a`
-
-**Note:** After determining base branch from args, I'll run the appropriate git commands to analyze commits and generate the squash message.
