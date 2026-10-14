@@ -21,8 +21,8 @@ cwd=$(jq -r '.cwd' <<<"$input")
 title=$(jq -r '.session_title // ""' <<<"$input")
 
 branch=$(git -C "$cwd" branch --show-current 2>/dev/null)
-[[ -z "$branch" ]] && exit 0
-[[ "$title" =~ -pr[0-9]+- ]] && exit 0
+[[ -z $branch ]] && exit 0
+[[ $title =~ -pr[0-9]+- ]] && exit 0
 
 # direnv supplies GH_TOKEN in repos whose keychain auth fails in subprocesses.
 if command -v direnv >/dev/null; then
@@ -37,23 +37,23 @@ ticket_pattern=${ticket_pattern:-sc-[0-9]+}
 ticket=""
 slug=$branch
 shopt -s nocasematch
-if [[ "$branch" =~ $ticket_pattern ]]; then
-    ticket=$(tr -d -- '-_' <<<"${BASH_REMATCH[0]}" | tr 'A-Z' 'a-z')
+if [[ $branch =~ $ticket_pattern ]]; then
+    ticket=$(tr -d -- '-_' <<<"${BASH_REMATCH[0]}" | tr '[:upper:]' '[:lower:]')
     slug=${branch/"${BASH_REMATCH[0]}"/}
 fi
 shopt -u nocasematch
 
-slug=$(sed -E 's/[^A-Za-z0-9]+/-/g; s/^-+|-+$//g' <<<"$slug" | tr 'A-Z' 'a-z')
+slug=$(sed -E 's/[^A-Za-z0-9]+/-/g; s/^-+|-+$//g' <<<"$slug" | tr '[:upper:]' '[:lower:]')
 date=$(date +%m%d)
 
 new_title=""
-if [[ -n "$pr" ]]; then
+if [[ -n $pr ]]; then
     new_title="${slug:+$slug-}pr$pr-$date"
-elif [[ -z "$title" && -n "$ticket" ]]; then
+elif [[ -z $title && -n $ticket ]]; then
     new_title="${slug:+$slug-}$ticket-$date"
 fi
 
-if [[ -n "$new_title" ]]; then
+if [[ -n $new_title ]]; then
     jq -n --arg title "$new_title" \
         '{hookSpecificOutput: {hookEventName: "SessionStart", sessionTitle: $title}}'
 fi

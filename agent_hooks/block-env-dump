@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Deny Bash commands that print environment variable values (env, printenv, set,
+# export -p, declare -p, /proc/*/environ, os.environ, process.env), or echo a
+# variable whose name looks like a secret, so that tokens in the environment stay
+# out of the transcript. Commands that only pass a secret to another program are
+# allowed.
+#
+# Reads the PreToolUse payload on stdin and prints a deny decision, or nothing.
+
+set -uo pipefail
+
+command="$(jq -r '.tool_input.command // empty')"
+[[ -z $command ]] && exit 0
+
+command_start='(^|[;&|({`]|\$\()[[:space:]]*'
+command_end='[[:space:]]*($|[|;&>)`])'
+secret_name='[A-Za-z0-9_]*(TOKEN|PAT|SECRET|PASSWORD|PASSWD|KEY|CREDENTIALS?)([^A-Za-z0-9_]|$)'
+
+patterns=(
+    "${command_start}(env|set|export|declare -x|export -p|typeset -x)${command_end}"
+    "${command_start}(printenv|declare[[:space:]]+-[A-Za-z]*p|typeset[[:space:]]+-[A-Za-z]*p)([[:space:]]|$)"
+    '/proc/[^[:space:]]*/environ'
+    "(echo|printf)[^|;&]*\\\$\\{?${secret_name}"
+    'os\.environ([^.[A-Za-z_]|$)'
+    'process\.env([^.[A-Za-z_]|$)'
+)
+
+for pattern in "${patterns[@]}"; do
+    if grep -qE -- "$pattern" <<<"$command"; then
+        jq -n '{
+            hookSpecificOutput: {
+                hookEventName: "PreToolUse",
+                permissionDecision: "deny",
+                permissionDecisionReason: "This command would print environment variable values, which can leak tokens into the transcript. List names only (compgen -e | grep ...) or test existence with [[ -v NAME ]]."
+            }
+        }'
+        exit 0
+    fi
+done
+
+exit 0

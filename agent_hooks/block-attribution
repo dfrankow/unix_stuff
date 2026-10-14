@@ -17,29 +17,29 @@ printf '%s' "$command" | grep -qE '(git( -C [^ ]+)? commit|gh (pr|api)[^|;&]*(cr
 pattern='Generated with|Co-Authored-By'
 
 deny() {
-  jq -n --arg reason "$1" '{
+    jq -n --arg reason "$1" '{
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
       permissionDecision: "deny",
       permissionDecisionReason: $reason
     }
   }'
-  exit 0
+    exit 0
 }
 
-reason="Remove the Claude Code attribution (\"Generated with\" / \"Co-Authored-By\") from the commit message or PR body."
+reason='Remove the Claude Code attribution ("Generated with" / "Co-Authored-By") from the commit message or PR body.'
 
 printf '%s' "$command" | grep -qiE "$pattern" && deny "$reason"
 
 files="$(printf '%s' "$command" | grep -oE -- '(--body-file|--file|-F)[ =]+[^ ;&|]+' | sed -E 's/^(--body-file|--file|-F)[ =]+//')"
 while IFS= read -r file; do
-  [ -z "$file" ] && continue
-  file="${file%\"}"
-  file="${file#\"}"
-  file="${file%\'}"
-  file="${file#\'}"
-  file="${file/#\~/$HOME}"
-  [ -f "$file" ] && grep -qiE "$pattern" "$file" && deny "$reason (found in $file)"
-done <<< "$files"
+    [ -z "$file" ] && continue
+    file="${file%\"}"
+    file="${file#\"}"
+    file="${file%\'}"
+    file="${file#\'}"
+    file="${file/#\~/$HOME}"
+    [ -f "$file" ] && grep -qiE "$pattern" "$file" && deny "$reason (found in $file)"
+done <<<"$files"
 
 exit 0
