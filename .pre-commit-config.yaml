@@ -98,6 +98,21 @@ repos:
   # don't just remove, seems dangerous
   # - id: remove-tabs
 
+# Limited to agent_hooks/ for now; other scripts get reformatted separately.
+- repo: https://github.com/scop/pre-commit-shfmt
+  rev: v3.14.1-1
+  hooks:
+    - id: shfmt
+      # 4-space indent so forbid-tabs passes
+      args: [-w, -s, -i, '4']
+      files: ^agent_hooks/
+
+- repo: https://github.com/shellcheck-py/shellcheck-py
+  rev: v0.11.0.1
+  hooks:
+    - id: shellcheck
+      files: ^agent_hooks/
+
 - repo: local
   hooks:
   # for Django templates

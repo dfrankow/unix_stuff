@@ -1,0 +1,59 @@
+#!/bin/bash
+# Claude Code SessionStart hook: name the session after the git branch's PR or
+# ticket, e.g. "fix-login-pr1068-1007" or "fix-login-proj123-1007".
+#
+# A session with no title gets the PR name if the branch has a GitHub PR, else the
+# ticket name if the branch contains a ticket key. A titled session is renamed only
+# when its title has no PR and the branch now has one, so manual names survive
+# until a PR is created.
+#
+# Matches Shortcut keys (sc-NNNN) by default. For Jira or another tracker, set a
+# case-insensitive extended regex per repo (or with --global):
+#   git config session-title.ticket-pattern 'PROJ-[0-9]+'
+#   git config session-title.ticket-pattern 'sc-[0-9]+|PROJ-[0-9]+'    # both
+#
+# Claude Code only: Codex's SessionStart hook can neither read nor set a session
+# title. Register in ~/.claude/settings.json under hooks.SessionStart, with matcher
+# "startup|resume|fork".
+
+input=$(cat)
+cwd=$(jq -r '.cwd' <<<"$input")
+title=$(jq -r '.session_title // ""' <<<"$input")
+
+branch=$(git -C "$cwd" branch --show-current 2>/dev/null)
+[[ -z "$branch" ]] && exit 0
+[[ "$title" =~ -pr[0-9]+- ]] && exit 0
+
+# direnv supplies GH_TOKEN in repos whose keychain auth fails in subprocesses.
+if command -v direnv >/dev/null; then
+    pr=$(cd "$cwd" && direnv exec "$cwd" gh pr view --json number -q .number 2>/dev/null)
+else
+    pr=$(cd "$cwd" && gh pr view --json number -q .number 2>/dev/null)
+fi
+
+ticket_pattern=$(git -C "$cwd" config --get session-title.ticket-pattern)
+ticket_pattern=${ticket_pattern:-sc-[0-9]+}
+
+ticket=""
+slug=$branch
+shopt -s nocasematch
+if [[ "$branch" =~ $ticket_pattern ]]; then
+    ticket=$(tr -d -- '-_' <<<"${BASH_REMATCH[0]}" | tr 'A-Z' 'a-z')
+    slug=${branch/"${BASH_REMATCH[0]}"/}
+fi
+shopt -u nocasematch
+
+slug=$(sed -E 's/[^A-Za-z0-9]+/-/g; s/^-+|-+$//g' <<<"$slug" | tr 'A-Z' 'a-z')
+date=$(date +%m%d)
+
+new_title=""
+if [[ -n "$pr" ]]; then
+    new_title="${slug:+$slug-}pr$pr-$date"
+elif [[ -z "$title" && -n "$ticket" ]]; then
+    new_title="${slug:+$slug-}$ticket-$date"
+fi
+
+if [[ -n "$new_title" ]]; then
+    jq -n --arg title "$new_title" \
+        '{hookSpecificOutput: {hookEventName: "SessionStart", sessionTitle: $title}}'
+fi

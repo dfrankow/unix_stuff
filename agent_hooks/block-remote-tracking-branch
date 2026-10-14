@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Deny creating a branch from a remote ref (e.g. `git switch -c foo origin/dev`)
+# without --no-track, so that the new branch does not take origin/dev as its
+# upstream and a later plain `git push` is not refused for the name mismatch.
+# An explicit --track or --no-track passes.
+#
+# Reads the PreToolUse payload on stdin and prints a deny decision, or nothing.
+
+set -uo pipefail
+
+command="$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)"
+[ -z "$command" ] && exit 0
+
+git_cmd='git( -C [^ ]+)?'
+remote_ref='(origin|upstream)/[^ ;&|]+'
+switch_from_remote="$git_cmd (switch|checkout)[^;&|]* -[cCbB] [^;&|]*$remote_ref"
+branch_from_remote="$git_cmd branch [^-;&| ][^ ;&|]* $remote_ref"
+printf '%s' "$command" | grep -qE "($switch_from_remote|$branch_from_remote)" || exit 0
+printf '%s' "$command" | grep -qE -- '(--no-track|--track|(^| )-t( |$))' && exit 0
+
+jq -n '{
+  hookSpecificOutput: {
+    hookEventName: "PreToolUse",
+    permissionDecision: "deny",
+    permissionDecisionReason: "Add --no-track when branching from a remote ref (git switch --no-track -c <branch> origin/<base>), so the branch does not take the remote base as its upstream."
+  }
+}'
+exit 0
