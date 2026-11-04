@@ -167,6 +167,9 @@ Examples:
 ### Commit Messages
 - **No "Co-Authored-By" or "Generated with" or Claude icon** - it's like an ad
 
+### Pull Requests
+- **Start the description with the squash-merge message** - a title-sized summary and a few short bullets covering the whole PR, so that it can be pasted as the squash commit body. The description is the only copy: no separate squash-message file. When later commits change what the PR does, update that top section. Anything else (approaches tried and dropped, follow-ups) goes below a `---` line and stays short, so it stays out of git log
+
 ### Repository State
 - **Ask git before saying what is pushed, merged, committed or still uncommitted** - `git ls-remote`, `git status`, `git log`. A summary or an earlier turn says what was true then, and someone else may have committed since
 
