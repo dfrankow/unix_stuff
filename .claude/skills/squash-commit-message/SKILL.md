@@ -17,7 +17,7 @@ Generate a timeless commit message suitable for GitHub squash-merge by analyzing
 2. Get the diff stats and changed files
 3. Filter out commits that are internal fixes (e.g., "fix bug introduced in previous commit")
 4. Synthesize remaining commits into one cohesive message following git-commit guidelines
-5. Write the message to `tmp/squash-commit-message.txt` for copy/paste
+5. Write the message to `tmp/pr<NUMBER>-squash-message.txt` for copy/paste
 
 ## Filtering Rules
 - **Skip internal fixes**: Don't include commits that fix issues introduced on the same branch
@@ -34,9 +34,10 @@ Follow git-commit skill rules:
 - **Factual only** - what changed, not how great it is
 
 ## Output
-Write the final message to `tmp/squash-commit-message.txt`, creating `tmp/` if needed.
-That directory is gitignored, so the file never shows up as untracked and needs no
-comment about it.
+Write the final message to `tmp/pr<NUMBER>-squash-message.txt`, where `<NUMBER>` is the
+current branch's PR (e.g. `tmp/pr311-squash-message.txt`), creating `tmp/` if needed. If
+the branch has no PR, ask rather than guess a name. That directory is gitignored, so the
+file never shows up as untracked and needs no comment about it.
 
 ## Implementation
 
@@ -44,6 +45,9 @@ comment about it.
 
 **Current branch:**
 !`git branch --show-current`
+
+**PR number for this branch:**
+!`gh pr view --json number -q .number 2>&1`
 
 **Available branches:**
 !`git branch -a`
