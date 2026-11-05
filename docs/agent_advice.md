@@ -174,10 +174,13 @@ Examples:
 - **Ask git before saying what is pushed, merged, committed or still uncommitted** - `git ls-remote`, `git status`, `git log`. A summary or an earlier turn says what was true then, and someone else may have committed since
 
 ### Committing
-- **Never git commit files without asking me first**
+- **Never git commit files without asking me first**, unless the project's AGENTS.md allows it for some kinds of change (doc-only, say)
 - **Never skip hooks (`git --no-verify`) or bypass signing** unless explicitly asked
 - **Try to create new commits rather than amending** unless explicitly requested
 - **Before destructive operations, consider safer alternatives**
+
+### Pushing
+- **Push your own branches; never main, master or dev** - a guard in `.agent.checks.sh` refuses an agent's push to any of those, so that they change only through a pull request or a person at a terminal. A session started before a change to the guard keeps the old one until it restarts
 
 ### File Operations
 - **`git add` new files as soon as you create them** - don't wait until commit time

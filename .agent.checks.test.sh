@@ -166,7 +166,25 @@ refute_block "git status, main behind origin"       git status --short
 
 echo "git push"
 # The suite always runs without a tty, which is the case the guard is aimed at.
-expect_block "git push (non-interactive)"  git push
+command git switch --quiet main
+expect_block "git push, on main"                  git push
+expect_block "git push origin, on main"           git push origin
+expect_block "git push origin main"               git push origin main
+expect_block "git push origin master"             git push origin master
+expect_block "git push origin dev"                git push origin dev
+expect_block "git push --all"                     git push --all origin
+expect_block "git push --mirror"                  git push --mirror origin
+command git switch --quiet -c feature
+expect_block "git push origin HEAD:main"          git push origin HEAD:main
+expect_block "git push origin +feature:refs/heads/main"  git push origin +feature:refs/heads/main
+expect_block "git push origin :main (delete)"     git push origin :main
+command git branch --quiet --set-upstream-to=origin/main
+expect_block "git push, branch tracking main"     git push
+command git branch --quiet --unset-upstream
+refute_block "git push -u origin feature"         git push --quiet -u origin feature
+refute_block "git push, branch tracking itself"   git push --quiet
+refute_block "git push origin HEAD"               git push --quiet origin HEAD
+command git switch --quiet main
 
 echo "attribution"
 attribution="Fix it

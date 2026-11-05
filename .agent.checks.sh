@@ -136,6 +136,45 @@ agent_reject_stale_start_point() {
     return 0
 }
 
+# Succeeds when a push would update a shared trunk (main, master or dev) on the
+# remote: a refspec naming one as its destination, --all or --mirror, or a push
+# with no refspec from a branch that is a trunk or tracks one.
+agent_push_targets_trunk() {
+    shift
+    local positional=0
+    local dest current upstream
+
+    for arg in "$@"; do
+        case "$arg" in
+            --all|--mirror) return 0 ;;
+            -*) ;;
+            *)
+                positional=$((positional + 1))
+                [ "$positional" -ge 2 ] || continue
+                dest="${arg#+}"
+                dest="${dest##*:}"
+                if [ "$dest" = "HEAD" ]; then
+                    dest=$(command git symbolic-ref --quiet --short HEAD 2>/dev/null)
+                fi
+                case "${dest#refs/heads/}" in
+                    main|master|dev) return 0 ;;
+                esac
+                ;;
+        esac
+    done
+
+    [ "$positional" -ge 2 ] && return 1
+    current=$(command git symbolic-ref --quiet --short HEAD 2>/dev/null)
+    upstream=$(command git rev-parse --abbrev-ref "@{upstream}" 2>/dev/null)
+    case "$current" in
+        main|master|dev) return 0 ;;
+    esac
+    case "${upstream#*/}" in
+        main|master|dev) return 0 ;;
+    esac
+    return 1
+}
+
 # Fails when a message or body carries the agent's advertising line, whether it
 # is passed inline or in a file named by -F, --file or --body-file.
 #
@@ -244,15 +283,15 @@ git() {
         fi
     fi
 
-    # Block git push for agents, allow silently for interactive users
-    if [ "$1" = "push" ]; then
-        if [ ! -t 0 ] || [ ! -t 1 ]; then
-            # No interactive terminal (likely an agent or a script)
-            echo "🚫 BLOCKED: git push not allowed in non-interactive context (likely an agent)"
-            echo "   If you're a human user, run this command directly in your terminal"
+    # Agents (no interactive terminal) push their own branches, so that trunks
+    # change only through a pull request or a person at a terminal.
+    if [ "$1" = "push" ] && { [ ! -t 0 ] || [ ! -t 1 ]; }; then
+        if agent_push_targets_trunk "$@"; then
+            echo "🚫 BLOCKED: agents may not push to main, master or dev"
+            echo "   Push a branch and merge it through a pull request,"
+            echo "   or run the push yourself in a terminal"
             return 1
         fi
-        # Interactive terminal - allow silently
     fi
 
     # TODO: Re-enable commit message checking once quote parsing is fixed

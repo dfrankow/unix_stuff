@@ -1,6 +1,6 @@
 ---
 name: review-pr
-description: Review someone else's pull request - gather its current state, read the diff against Dan's correctness and style criteria, and report findings in his preferred shape. Use when asked to review a PR by number, URL, or branch.
+description: Review someone else's pull request - gather its current state, read the diff against the user's correctness and style criteria, and report findings in their preferred shape. Use when asked to review a PR by number, URL, or branch.
 ---
 
 # Reviewing someone else's pull request
@@ -10,7 +10,7 @@ The author owns the fix; you own naming the problem clearly and being right abou
 
 ## 1. Get the current state before saying anything about it
 
-Never report a PR's review state from memory or from earlier in the session — Dan approves,
+Never report a PR's review state from memory or from earlier in the session — the user approves,
 comments and merges between turns.
 
 ```bash
@@ -105,13 +105,13 @@ their reply, so it has to be unique in the review.
 
 - No inline backticks in the prose. Nearly every noun is code, and a paragraph of backticks is
   unreadable. Fenced blocks are fine, and are where a suggestion belongs.
-- No line-prefix markers (`> `, `| `) on text Dan may want to copy — the prefix comes along
+- No line-prefix markers (`> `, `| `) on text the user may want to copy — the prefix comes along
   with the selection.
 - Don't wrap lines; GitHub reflows.
 
 ## 5. Posting
 
 Print the review in the terminal first. Show the exact text before posting anything to GitHub,
-and post only when Dan says to — a review is outward-facing and there is no clean undo.
+and post only when the user says to — a review is outward-facing and there is no clean undo.
 
 Keep the terminal summary to a few lines, not a categorized breakdown.
