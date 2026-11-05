@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Guardrails for coding agents (Claude Code, Codex, ...). Source from .bashrc
 # and .zshrc.
 #
@@ -16,43 +17,6 @@
 # has: no associative arrays, no ${var^^}.
 #
 # .agent.checks.test.sh tests this file under both shells. Run it after edits.
-
-# Forbidden words in git commit messages - meaningless marketing babble
-FORBIDDEN_COMMIT_WORDS=(
-    "comprehensive"
-    "robust"
-    "seamless"
-    "leverage"
-    "synergy"
-    "paradigm"
-    "holistic"
-    "cutting-edge"
-    "state-of-the-art"
-    "enterprise-grade"
-    "noreply@anthropic.com"
-)
-
-# TODO: Fix commit message checking - currently broken with complex quoting
-# check_commit_message() {
-#     local commit_msg="$1"
-#     local forbidden_found=()
-#
-#     for word in "${FORBIDDEN_COMMIT_WORDS[@]}"; do
-#         if echo "$commit_msg" | grep -iq "$word"; then
-#             forbidden_found+=("$word")
-#         fi
-#     done
-#
-#     if [ ${#forbidden_found[@]} -gt 0 ]; then
-#         echo "🚫 BLOCKED: Commit message contains forbidden marketing babble:"
-#         printf "   - %s\n" "${forbidden_found[@]}"
-#         echo ""
-#         echo "Please use clear, specific language instead."
-#         return 1
-#     fi
-#
-#     return 0
-# }
 
 # Helper names here avoid a leading underscore so that coding agents get the
 # guards too: Claude Code replays a snapshot of these functions in each of its
@@ -216,13 +180,69 @@ agent_reject_attribution() {
     return 0
 }
 
+# Fails when a commit message, or a pull request or issue title or body, uses a
+# word that reads as marketing filler. Only message text and message files are
+# checked, so that 'git grep robust' and file names still work, and only whole
+# words, so that "robustness" passes.
+#
+# The list is a local for the same reason as in agent_reject_attribution.
+agent_reject_filler_words() {
+    local words=(comprehensive robust seamless leverage synergy paradigm
+        holistic cutting-edge state-of-the-art enterprise-grade
+        noreply@anthropic.com)
+    local next_is_text=false
+    local next_is_file=false
+    local text file word
+
+    for arg in "$@"; do
+        text=""
+        file=""
+        if [ "$next_is_text" = "true" ]; then
+            text="$arg"
+            next_is_text=false
+        fi
+        if [ "$next_is_file" = "true" ]; then
+            file="$arg"
+            next_is_file=false
+        fi
+        case "$arg" in
+            -m | --message | -t | --title | -b | --body) next_is_text=true ;;
+            -F | --file | --body-file) next_is_file=true ;;
+            --message=* | --title=* | --body=*) text="${arg#*=}" ;;
+            --file=* | --body-file=*) file="${arg#*=}" ;;
+            -m?*) text="${arg#-m}" ;;
+            -[!-]*m) next_is_text=true ;;
+        esac
+        if [ -f "$file" ]; then
+            text=$(cat "$file")
+        fi
+        [ -n "$text" ] || continue
+
+        for word in "${words[@]}"; do
+            if printf '%s\n' "$text" | grep -qiwF -e "$word"; then
+                echo "🚫 BLOCKED: message uses '$word', which reads as marketing filler"
+                echo "   Say what the change does in plain words instead"
+                return 1
+            fi
+        done
+    done
+
+    return 0
+}
+
 gh() {
     agent_reject_attribution "$@" || return 1
+    case "$1" in
+        pr | issue) agent_reject_filler_words "$@" || return 1 ;;
+    esac
     command gh "$@"
 }
 
 git() {
     agent_reject_attribution "$@" || return 1
+    if [ "$1" = "commit" ]; then
+        agent_reject_filler_words "$@" || return 1
+    fi
 
     # Check for --no-verify flag anywhere in arguments
     for arg in "$@"; do

@@ -21,7 +21,7 @@ if [ -z "${AGENT_CHECKS_INNER:-}" ]; then
             echo "SKIP $shell_name (not installed)"
             continue
         fi
-        echo "=== $shell_name ($("$shell_name" -c 'echo $BASH_VERSION$ZSH_VERSION') ) ==="
+        echo "=== $shell_name ($("$shell_name" -c "echo \$BASH_VERSION\$ZSH_VERSION") ) ==="
         AGENT_CHECKS_INNER=1 "$shell_name" "$0" || driver_status=1
     done
     exit "$driver_status"
@@ -200,6 +200,21 @@ expect_block "gh pr create --body=<attribution>"   gh pr create --body="$attribu
 expect_block "gh pr edit --body-file <file>"       gh pr edit 1 --body-file "$attribution_file"
 refute_block "git commit -m 'Generated with care'" git commit --dry-run -m "Generated with care"
 refute_block "gh --version"                        gh --version
+
+echo "filler words"
+filler_file="$(dirname "$repo")/filler.txt"
+printf 'Add a parser\n\nIt is seamless.\n' > "$filler_file"
+expect_block "git commit -m 'robust'"             git commit --dry-run -m "Add a robust parser"
+expect_block "git commit -m 'Robust' (any case)"  git commit --dry-run -m "Robust parser"
+expect_block "git commit -am 'robust'"            git commit --dry-run -am "Add a robust parser"
+expect_block "git commit --message='robust'"      git commit --dry-run --message="Add a robust parser"
+expect_block "git commit -m 'state-of-the-art'"   git commit --dry-run -m "A state-of-the-art parser"
+expect_block "git commit -F <filler file>"        git commit --dry-run -F "$filler_file"
+expect_block "gh pr create --title 'robust'"      gh pr create --title "Add a robust parser" --body x
+expect_block "gh pr create --body-file <file>"    gh pr create --title x --body-file "$filler_file"
+refute_block "git commit -m 'robustness'"         git commit --dry-run -m "Test robustness of the parser"
+refute_block "git commit -m 'Fix the parser'"     git commit --dry-run -m "Fix the parser"
+refute_block "git grep robust"                    git grep robust
 
 echo "pip"
 expect_block "pip install requests"           pip install requests
