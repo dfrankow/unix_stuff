@@ -5,28 +5,39 @@ description: Generate a timeless squash-merge commit message for GitHub by analy
 
 # Squash Commit Message Generator
 
-Generate a timeless commit message suitable for GitHub squash-merge by analyzing all commit messages since a base branch.  By "timeless" I mean something that describes only those things we'll still be interested in a year from now.
+Generate a timeless commit message suitable for GitHub squash-merge by analyzing
+all commit messages since a base branch. By "timeless" I mean something that
+describes only those things we'll still be interested in a year from now.
 
 ## Usage
+
 - `/squash-commit-message` - uses "main" as base branch
 - `/squash-commit-message work` - uses "work" as base branch
 - `/squash-commit-message stuff` - uses "stuff" as base branch
 
 ## Process
-1. Get all full commit messages since the base branch: `git log --format=fuller ${base_branch}..HEAD`
+
+1. Get all full commit messages since the base branch:
+   `git log --format=fuller ${base_branch}..HEAD`
 2. Get the diff stats and changed files
-3. Filter out commits that are internal fixes (e.g., "fix bug introduced in previous commit")
-4. Synthesize remaining commits into one cohesive message following git-commit guidelines
+3. Filter out commits that are internal fixes (e.g., "fix bug introduced in
+   previous commit")
+4. Synthesize remaining commits into one cohesive message following git-commit
+   guidelines
 5. Put the message at the top of the PR description
 
 ## Filtering Rules
-- **Skip internal fixes**: Don't include commits that fix issues introduced on the same branch
+
+- **Skip internal fixes**: Don't include commits that fix issues introduced on
+  the same branch
 - **Skip typo/formatting fixes**: Unless they fix production issues
 - **Focus on net changes**: What would a user see as the final result?
 - **Combine related work**: Group commits that work toward the same goal
 
 ## Message Guidelines
+
 Follow git-commit skill rules:
+
 - **Be concise** - scale to total change size
 - **Use bullets** for multiple changes
 - **Be specific** - mention key files/classes that changed
@@ -34,18 +45,19 @@ Follow git-commit skill rules:
 - **Factual only** - what changed, not how great it is
 
 ## Output
-Replace the top section of the current branch's PR description (everything above the first
-`---` line, or the whole description if there is none) with the message, using
-`gh pr edit --body-file`. Keep everything from the `---` line down unchanged. The first line
-of the message also becomes the PR title (`gh pr edit --title`). If the branch has no PR,
-show the message in the reply instead. Write no separate message file.
+
+Replace the top section of the current branch's PR description (everything above
+the first `---` line, or the whole description if there is none) with the
+message, using `gh pr edit --body-file`. Keep everything from the `---` line
+down unchanged. The first line of the message also becomes the PR title
+(`gh pr edit --title`). If the branch has no PR, show the message in the reply
+instead. Write no separate message file.
 
 ## Implementation
 
-**Arguments:** The first argument is the base branch (defaults to "main" if not provided)
+**Arguments:** The first argument is the base branch (defaults to "main" if not
+provided)
 
-**Current branch:**
-!`git branch --show-current`
+**Current branch:** !`git branch --show-current`
 
-**Available branches:**
-!`git branch -a`
+**Available branches:** !`git branch -a`

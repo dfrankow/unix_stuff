@@ -6,26 +6,44 @@ description: ALWAYS use this skill when committing code. Triggers on any commit 
 # Git Commit Rules
 
 ### 1. Headline Format
+
 - Use the **imperative mood** (e.g., "Add feature" or "Fix bug").
 - Do not use prefixes like "feat:" or "fix:".
 
 ### 2. Length Constraints (Strict)
-- **If code diff is <50 lines:** Limit message to **1-2 lines total**.
+
+- **If code diff is under 50 lines:** Limit message to **1-2 lines total**.
 - **If code diff is 50-200 lines:** Limit message to **maximum 5 lines**.
 - **If code diff is >200 lines:** Limit message to **maximum 10 lines**.
 
 ### 3. Content & Style
+
 - **Focus:** Explain the "what" and "why." Omit the "how."
-- **Specificity:** Reference specific filenames and functions. **Do not** reference line numbers.
+- **Specificity:** Reference specific filenames and functions. **Do not**
+  reference line numbers.
 - **Formatting:** Use **bullet points** for the body. Avoid walls of text.
-- **Completeness:** Look over all changes since the last commit, don't just focus on what you remember from the last few prompts.
-- Don't say how many test are passing.  We always require them all to pass.
+- **Completeness:** Look over all changes since the last commit, don't just
+  focus on what you remember from the last few prompts.
+- Don't say how many test are passing. We always require them all to pass.
 - **Brevity:** Try to keep the text short.
 
 ### git usage
-- Do "git commit ." or "git add -u" instead of always adding each file separately.  You only have to "git add" untracked files that should be in the commit.
-- Before committing, run "git status" and check the untracked-files list for anything that belongs in this change (new migrations, new modules, new test files, etc.) — "git commit ." / "git add -u" only stage modifications to already-tracked files, so a new file you just created will silently NOT be included unless you "git add" it explicitly. After the commit, run "git status" again to confirm nothing relevant was left out.
+
+- Do "git commit ." or "git add -u" instead of always adding each file
+  separately. You only have to "git add" untracked files that should be in the
+  commit.
+- Before committing, run "git status" and check the untracked-files list for
+  anything that belongs in this change (new migrations, new modules, new test
+  files, etc.) — "git commit ." / "git add -u" only stage modifications to
+  already-tracked files, so a new file you just created will silently NOT be
+  included unless you "git add" it explicitly. After the commit, run "git
+  status" again to confirm nothing relevant was left out.
 
 ### What to report afterwards
-- The commit hash and whether the tree is clean, and nothing else. **No remote state** — unpushed counts, whether to push, where origin is — and no news about other repos. Nothing here printed those, so they would be recalled rather than checked, and they go stale as soon as anyone else pushes.
-- Asked about any of it? Run "git status -sb" or "git ls-remote" first, and quote what it printed.
+
+- The commit hash and whether the tree is clean, and nothing else. **No remote
+  state** — unpushed counts, whether to push, where origin is — and no news
+  about other repos. Nothing here printed those, so they would be recalled
+  rather than checked, and they go stale as soon as anyone else pushes.
+- Asked about any of it? Run "git status -sb" or "git ls-remote" first, and
+  quote what it printed.

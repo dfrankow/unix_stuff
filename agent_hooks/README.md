@@ -5,7 +5,8 @@ executable.
 
 ## Claude Code
 
-Register them in `~/.claude/settings.json`, then run `/hooks` to confirm they loaded:
+Register them in `~/.claude/settings.json`, then run `/hooks` to confirm they
+loaded:
 
 ```json
 "hooks": {

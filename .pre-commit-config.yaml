@@ -98,6 +98,13 @@ repos:
   # don't just remove, seems dangerous
   # - id: remove-tabs
 
+- repo: https://github.com/hukkin/mdformat
+  rev: 1.0.0
+  hooks:
+  - id: mdformat
+    args: [--wrap, "80", --number]
+    additional_dependencies: [mdformat-gfm==1.0.0, mdformat-frontmatter==2.2.0]
+
 # Limited to agent_hooks/ for now; other scripts get reformatted separately.
 - repo: https://github.com/scop/pre-commit-shfmt
   rev: v3.14.1-1
