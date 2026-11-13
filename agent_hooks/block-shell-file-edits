@@ -1,0 +1,116 @@
+#!/bin/bash
+
+# Deny Bash commands that write or edit files, so file changes go through the
+# Edit and Write tools instead. Read-only shell use is untouched.
+#
+# Reads the PreToolUse payload on stdin and prints a deny decision, or nothing.
+
+set -uo pipefail
+
+command="$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)"
+[ -z "$command" ] && exit 0
+
+deny() {
+    jq -n --arg reason "$1" '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "deny",
+      permissionDecisionReason: $reason
+    }
+  }'
+    exit 0
+}
+
+has() {
+    printf '%s' "$command" | grep -qE "$1"
+}
+
+# Redirects and heredocs are found by scanning text, so a > or << inside a
+# quoted string reads as one. Mask those before scanning; nothing else changes.
+mask_quoted() {
+    local s="$1" out="" q="" c i
+    for ((i = 0; i < ${#s}; i++)); do
+        c="${s:i:1}"
+        if [ -z "$q" ]; then
+            case "$c" in "'" | '"') q="$c" ;; esac
+        elif [ "$c" = "$q" ]; then
+            q=""
+        fi
+        if [ -n "$q" ] && { [ "$c" = ">" ] || [ "$c" = "<" ]; }; then
+            c="~"
+        fi
+        out+="$c"
+    done
+    printf '%s' "$out"
+}
+
+MASKED="$(mask_quoted "$command")"
+
+masked_has() {
+    printf '%s' "$MASKED" | grep -qE "$1"
+}
+
+# A redirect target that cannot be a source file being edited.
+target_is_safe() {
+    set -- "${1%\"}"
+    set -- "${1#\"}"
+    set -- "${1%\'}"
+    set -- "${1#\'}"
+    case "$1" in
+    '&'*) return 0 ;; # 2>&1 and friends
+    /dev/*) return 0 ;;
+    /tmp/* | /private/tmp/* | /var/folders/*) return 0 ;;
+    *'/scratchpad/'*) return 0 ;;
+    tmp/* | */tmp/*) return 0 ;; # a project's tmp/DATE
+    *) return 1 ;;
+    esac
+}
+
+# sed -i, sed --in-place, sed -E -i, gsed -i, sed -i.bak
+if has '(^|[^[:alnum:]_/-])g?sed[[:space:]]+[^;&|]*(-[a-zA-Z]*i([[:space:]]|$|\.|'"'"')|--in-place)'; then
+    deny "sed -i edits a file in place. Use the Edit tool instead."
+fi
+
+# perl -i / perl -pi -e
+if has '(^|[^[:alnum:]_/-])perl[[:space:]]+[^;&|]*-[a-zA-Z]*i'; then
+    deny "perl -i edits a file in place. Use the Edit tool instead."
+fi
+
+# An interpreter taking its script from a heredoc, which is how a shell command
+# smuggles in an arbitrary file rewrite.
+if masked_has '(^|[^[:alnum:]_/-])(python3?|perl|ruby|node|osascript)[[:space:]]+[^;&|]*<<'; then
+    deny "Running a heredoc script to change files hides the diff. Use the Edit or Write tool instead."
+fi
+
+# Any heredoc paired with a redirect into a file (cat > f <<EOF).
+if masked_has '<<' && masked_has '>'; then
+    while read -r redirect; do
+        file="${redirect#*>}"
+        file="${file#>}"
+        file="${file#"${file%%[![:space:]]*}"}"
+        [ -z "$file" ] && continue
+        target_is_safe "$file" || deny "Writing a file from a heredoc hides the diff. Use the Write tool instead."
+    done < <(printf '%s' "$MASKED" | grep -oE '>>?[[:space:]]*[^[:space:];&|)]+' || true)
+fi
+
+# Plain redirection that creates or overwrites a file.
+while read -r redirect; do
+    file="${redirect#*>}"
+    file="${file#>}"
+    file="${file#"${file%%[![:space:]]*}"}"
+    [ -z "$file" ] && continue
+    target_is_safe "$file" || deny "Redirecting into '$file' writes a file. Use the Write tool, or redirect under the scratchpad directory."
+done < <(printf '%s' "$MASKED" | grep -oE '>>?[[:space:]]*[^[:space:];&|)]+' || true)
+
+# tee writes every file it is given.
+while read -r match; do
+    file="${match#*tee}"
+    file="${file#"${file%%[![:space:]]*}"}"
+    file="${file#-a}"
+    file="${file#"${file%%[![:space:]]*}"}"
+    [ -z "$file" ] && continue
+    target_is_safe "$file" || deny "tee writes '$file'. Use the Write tool instead."
+done < <(printf '%s' "$command" |
+    grep -oE '(^|[^[:alnum:]_/-])tee[[:space:]]+(-a[[:space:]]+)?[^[:space:];&|)]+' || true)
+
+exit 0

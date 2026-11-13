@@ -16,7 +16,8 @@ loaded:
       "hooks": [
         {"type": "command", "command": "~/unix_stuff/agent_hooks/block-attribution"},
         {"type": "command", "command": "~/unix_stuff/agent_hooks/block-env-dump"},
-        {"type": "command", "command": "~/unix_stuff/agent_hooks/block-remote-tracking-branch"}
+        {"type": "command", "command": "~/unix_stuff/agent_hooks/block-remote-tracking-branch"},
+        {"type": "command", "command": "~/unix_stuff/agent_hooks/block-shell-file-edits"}
       ]
     }
   ],

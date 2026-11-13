@@ -1,6 +1,8 @@
 # General AI Coding Agent Advice (Project-Agnostic)
 
-This file is shared across machines as general advice for all agents.
+This file is shared across machines as general advice for all agents. Python and
+Django advice lives in `agent_advice_python.md`, which loads only for those
+files.
 
 ## Writing (Comments, Docstrings, Docs)
 
@@ -15,35 +17,30 @@ This file is shared across machines as general advice for all agents.
 - **A TODO starts with what to do** - `TODO: Skip X when Y.` first, then any
   background. A reader scanning TODOs wants the task, not a description of
   today's behavior they have to turn into one
-- **Make comments and docs timeless** - write for tomorrow, not today's task; a
-  comment should still be relevant in six months. If a detail really is
-  time-sensitive, date it explicitly ("June 2026: we reduced workers to 1
-  because...") so a future reader knows it may no longer apply.
+- **Make comments and docs timeless** - a comment should still be relevant in
+  six months. If a detail really is time-sensitive, date it explicitly ("June
+  2026: we reduced workers to 1 because...")
 - **Don't add comments with magic numbers that are likely to go out of date**
 - **Default to writing no comments** - write one only when the WHY is
   non-obvious
 - **Don't refer to files unavailable from the repo you're in** - scratch notes
-  outside git, `tmp/` files, or docs in another checkout. A path the reader
-  can't open is dead weight; spell out the rule instead of pointing at it. This
-  applies equally to a write-up meant as a public report, such as one attached
-  to an issue tracker card; attach the underlying data files if reviewers need
-  them. The rule is directional: an uncommitted doc may point at a committed
-  one, never the reverse
+  outside git, `tmp/` files, or docs in another checkout. Spell out the rule
+  instead of pointing at it. This applies equally to a public write-up, such as
+  one attached to an issue tracker card; attach the underlying data files if
+  reviewers need them. The rule is directional: an uncommitted doc may point at
+  a committed one, never the reverse
 - **Verify a "because" before writing it** - a reason that names other code is a
   claim about that code, so go read it first. Asserting that some downstream
   step needs a field, when nothing there reads it, is a reason invented to fill
-  the slot. An unverified reason is worse than none, since a comment is exactly
-  where a reader stops checking. Give the reason you can confirm, or none.
+  the slot. A comment is exactly where a reader stops checking, so give the
+  reason you can confirm, or none
 - **If one rewrite does not land, stop rewording** - a reader who still does not
-  understand is missing a fact or has caught a false one, and the third phrasing
-  of a wrong claim is still wrong. Ask what they think the sentence says, or go
-  verify the claim.
+  understand is missing a fact or has caught a false one. Ask what they think
+  the sentence says, or go verify the claim
 - **Describe this code, not the rest of the system** - a comment explains what
-  it sits near. Describing behavior that lives elsewhere means that code can
-  change and nothing points back here to say the comment is now wrong. Narrative
-  that ties parts together is sometimes worth writing, but it should be rare and
-  belong somewhere central - a module docstring, a README - not scattered where
-  it will silently rot.
+  it sits near, so that when other code changes no comment here silently goes
+  wrong. Narrative that ties parts together belongs somewhere central - a module
+  docstring, a README - and should be rare
 
 ### Documentation Comments (docstrings / Javadoc)
 
@@ -72,13 +69,8 @@ This file is shared across machines as general advice for all agents.
 
 ## Communication Style
 
-### Word Choice
-
 - **Never say "breakthrough"** - none of your results are breakthroughs
 - **Prefer full terms over abbreviations** - "leave-one-session-out" over "LOSO"
-
-### Output
-
 - **Responses should be short and concise**
 - **Don't overpromise** - narrowing is not solving
 - **Look before asserting the state of anything outside the conversation** -
@@ -93,13 +85,8 @@ This file is shared across machines as general advice for all agents.
 
 ## General Code Style (Language-Independent)
 
-### Variable Naming
-
-- **Avoid one-letter variable names** - prefer "err" instead of "e", "idx"
-  instead of "i", "jdx" instead of j
-
-### Function Design
-
+- **Avoid one-letter variable names** - "err" not "e", "idx" not "i", "jdx" not
+  "j"
 - **No default parameters** - Defaults belong at the outer layer (argparse,
   config files) where they're visible and easily changed. Inner functions
   receive explicit values. If one is genuinely wanted (dependency injection for
@@ -108,107 +95,45 @@ This file is shared across machines as general advice for all agents.
 - **Use as few return statements as possible** - Ideally 0 or 1
 - **Avoid private members unless absolutely necessary** - propose plans to make
   public interfaces or new functions instead
-
-### Interfaces
-
 - **For computer-to-computer interfaces (APIs, functions), be intolerant** - it
   finds bugs more quickly
-
-### Exception Handling
-
 - **Avoid broad exceptions** - catching "except Exception" (or Java's
   `catch (Exception e)`) is almost always wrong. If we don't expect the code to
-  fail, just let exceptions raise so we can detect errors.
-- **If there is an expected exception case, do an if check if possible**
-- **If not, use a narrower exception class**
-
-### Assertions
-
+  fail, let it raise so we can detect errors. For an expected failure, do an if
+  check if possible, and otherwise catch a narrower exception class
 - **If you always expect something to be true due to code structure, assert it**
   rather than if-check it
-
-### Data Sources
-
 - **No fallback to a less reliable source unless we agree it's worthwhile** -
   prefer no data over bad data. A silent fallback looks like a normal answer, so
   stale or guessed values pass unnoticed. Fail, or name the source in the
   output.
+- **Use the symbol, not the constant** - If there is an enum or constant, use
+  the symbol rather than copying its value, so that the code stays tied together
 
-### Constants and Symbols
+## Code Organization
 
-- **Use the symbol, not the constant** - If there is an enum or constant, don't
-  copy its value, use the symbol. That helps tie code together.
-
-## Code Organization Philosophy
-
-**Less code is better:**
-
-- Prefer an existing package, or an existing reusable function or class, to
-  writing new code
-
-**Splitting an over-long file:**
-
-- Don't carve off a small chunk to squeak under a limit — find a seam that
-  halves the file and split there
-- Do it as its own PR with no functionality changes, so it reviews as a pure
-  move
-
-**Favor leaner code:**
-
-- You have a tendency to write too much code that's too specific to the current
-  moment
-- Keep functions and modules focused on their core responsibility
+- **Less code is better** - you tend to write too much code that's too specific
+  to the current moment. Prefer an existing package, function or class to new
+  code, and keep functions and modules focused on their core responsibility
 - **Favor simplicity over backward compatibility** when you control the entire
   codebase and there are no external clients depending on it
-
-## Python-Specific Style
-
-### Function Calls
-
-- **Calling with named parameters is okay** - we can still catch missing
-  parameters
-
-### Imports
-
-- **All imports at the top of the file** - never use inline imports inside
-  functions or methods, even in tests
-- **Don't manually remove unused imports** - ruff handles this automatically
-
-### Other
-
-- **Never modify sys.path** - assume PYTHONPATH is set correctly
-- **Don't use `from __future__ import annotations`** unless the project is on
-  Python < 3.12 and you actually need it
-
-## Django-Specific
-
-### Development
-
-- **Minimal JavaScript**: Absolute bare minimum. Prefer server-side solutions.
-- **When JS needed**: Use htmx first, custom JavaScript only as last resort.
-- **Architecture**: Server-side rendering, standard HTML forms, progressive
-  enhancement.
+- **Split an over-long file at a seam that halves it** - not by carving off a
+  small chunk to squeak under a limit. Do it as its own PR with no functionality
+  changes, so it reviews as a pure move
 
 ## Linting and Code Quality
 
-### General Principle
-
-- **Never disable a linter check** (ruff, pylint, checkstyle, eslint, etc.)
-  **without discussion** - prefer fixing the underlying issue
-- **Don't add suppression comments** (`# noqa`, `pylint: disable`,
-  `@SuppressWarnings`, etc.) **without asking first**
-- **If we decide to disable, add a BRIEF comment explaining why**
-- **Don't silently suppress warnings** - they usually point to real issues
+- **Never disable a linter check** (ruff, pylint, checkstyle, eslint, etc.) **or
+  add a suppression comment** (`# noqa`, `pylint: disable`, `@SuppressWarnings`,
+  etc.) **without discussion** - warnings usually point to real issues. If we
+  decide to disable, add a BRIEF comment explaining why
+- **Don't run `pre-commit` by hand** - committing runs it
 
 When a linter flags a problem, discuss whether to:
 
 - Refactor (too many arguments → config object, variable shadowing → rename)
 - Fix directly (missing `strict=` in zip → add it)
 - Suppress with justification (rare cases where the rule doesn't apply)
-
-### Python (Ruff/Pylint)
-
-- **Don't run `pre-commit` by hand** - committing runs it
 
 ## Testing
 
@@ -233,10 +158,13 @@ my time.
   before continuing to the next thing
 - Don't poll a backgrounded run (an `until grep ... done` loop over its output,
   say). Read the output when the task notification arrives
-- Redirect a suite's output to a file rather than piping it through `grep`,
-  `tail` or `head`, so that the exit code is the suite's and not the pipe's
 
 The same goes for any long-running command: builds, imports, data jobs, deploys.
+
+**A run longer than a minute shows progress**, through tqdm or a log line per
+step, so that I can tell how far along it is. Its output goes to a file I can
+watch, never through `grep`, `tail`, `head` or another pipe that holds it back
+until the end or replaces the command's exit code with the pipe's.
 
 ### TDD Approach
 
@@ -246,25 +174,10 @@ The same goes for any long-running command: builds, imports, data jobs, deploys.
 2. **GREEN**: Write minimal code to make tests pass
 3. **REFACTOR**: Clean up code while keeping tests green
 
-This prevents regressions and ensures fixes actually work.
-
-### Python/Django Test File Naming
-
-**Unit tests mirror source directory structure:**
-
-- Source file: `bar/foo.py`
-- Test file: `tests/bar/test_foo.py`
-
-Examples:
-
-- `evaluation/metrics.py` → `tests/evaluation/test_metrics.py`
-- `app/foo.py` → `app/tests/test_foo.py` (Django convention)
-- `classifiers.py` → `tests/test_classifiers.py`
-
 ## Git
 
-- I almost always squash-merge to main in my projects, with only occasional
-  exceptions if I want to preserve history of a long branch.
+I almost always squash-merge to main in my projects, with only occasional
+exceptions if I want to preserve history of a long branch.
 
 ### Commit Messages
 
@@ -330,7 +243,5 @@ Examples:
 - **Put temporary files in `tmp/DATE`** where DATE is MMDD or YYYYMMDD
 - **If a debugging tool will be generally useful, put it in `bin/`**
 - **You can use `jq` to parse JSON or NDJSON**
-
-**If giving a command to run that is more than one line, put it in a file** -
-copying and pasting from the CLI has weird spacing issues (indented at least 2
-spaces, sometimes picks up spaces after lines).
+- **Put a command to run that is more than one line in a file** - pasting from
+  the CLI picks up stray indentation and trailing spaces

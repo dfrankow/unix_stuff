@@ -68,8 +68,9 @@ what it says.
   the implementation? Tests mirror source structure — `bar/foo.py` →
   `tests/bar/test_foo.py`.
 
-**Then the house style** (from `agent_advice.md` and the project `CLAUDE.md`) —
-these are real findings, not nits, because they are settled decisions:
+**Then the house style** (from `agent_advice.md`, `agent_advice_python.md` and
+the project `CLAUDE.md`) — these are real findings, not nits, because they are
+settled decisions:
 
 - `except Exception` and other broad catches. Let it raise, or use an `if`, or
   catch narrowly.

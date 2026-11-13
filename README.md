@@ -18,6 +18,18 @@ It has to keep working under both shells, so run the tests after editing it:
 $ ./.agent.checks.test.sh
 ```
 
+## Agent advice
+
+`docs/agent_advice.md` holds instructions for every coding agent session; import
+it from `~/.claude/CLAUDE.md` with `@~/unix_stuff/docs/agent_advice.md`.
+`docs/agent_advice_python.md` is a Claude Code path-scoped rule, so that its
+Python and Django advice loads only when an agent touches those files. Link it
+into the user rules directory:
+
+```
+mkdir -p ~/.claude/rules && ln -s ~/unix_stuff/docs/agent_advice_python.md ~/.claude/rules/python.md
+```
+
 For django command-line completion:
 
 ```
