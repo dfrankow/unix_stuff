@@ -7,7 +7,9 @@
     co = checkout
     # --format, not `branch -vv`, so the "* " / "+ " marker on the current or a
     # worktree branch is never mistaken for the branch name.
-    gone = "!f() { git fetch -p && git branch --format=\"%(refname:short) %(upstream:track)\" | awk '$2==\"[gone]\"{print $1}'; }; f"
+    # Skips the current branch and main/master so that a renamed default branch
+    # upstream is not deleted as if it were a merged feature branch.
+    gone = "!f() { git fetch -p && git branch --format=\"%(refname:short) %(upstream:track) %(HEAD)\" | awk '$2==\"[gone]\" && $3!=\"*\" && $1!=\"main\" && $1!=\"master\" {print $1}'; }; f"
     rm-gone = "!f() { git gone | while read branch_name; do git branch -D \"$branch_name\"; done; }; f"
     # Enables blame.ignoreRevsFile only when .git-blame-ignore-revs exists at
     # the repo's top level. Plain `git blame` fails fatally if that config
@@ -18,6 +20,11 @@
 [push]
     # Without this, git is chatty
     default = simple
+
+[branch]
+    # Track a remote branch only when its name matches, so that a branch
+    # started from origin/dev pushes to its own name, not to dev.
+    autoSetupMerge = simple
 
 [diff]
         tool = tkdiff
