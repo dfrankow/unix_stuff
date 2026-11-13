@@ -12,6 +12,9 @@ This file is shared across machines as general advice for all agents.
   doc in `docs/`: say what to run and what judgment the reader brings, not a
   script's flags, prompts, or output - `--help` covers those
 - **I prefer top-comments to side-comments**
+- **A TODO starts with what to do** - `TODO: Skip X when Y.` first, then any
+  background. A reader scanning TODOs wants the task, not a description of
+  today's behavior they have to turn into one
 - **Make comments and docs timeless** - write for tomorrow, not today's task; a
   comment should still be relevant in six months. If a detail really is
   time-sensitive, date it explicitly ("June 2026: we reduced workers to 1
@@ -276,6 +279,12 @@ Examples:
   update that top section. Anything else (approaches tried and dropped,
   follow-ups) goes below a `---` line and stays short, so it stays out of git
   log
+- **When the bottom of a PR stack merges, let GitHub retarget the next one** -
+  it moves the next PR's base on its own, so don't edit the base by hand. It
+  rebases the branch only sometimes: after `git fetch`, if
+  `git log origin/<base>..origin/<branch>` still lists the merged PR's commits,
+  merge the base into the branch so that the PR's diff shows only its own
+  changes
 
 ### Repository State
 
