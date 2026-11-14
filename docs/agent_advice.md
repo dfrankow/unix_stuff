@@ -51,6 +51,11 @@ files.
   why it matters → dramatized consequence. Keep the fact, usually keep the why,
   always cut the third. Shortening by deleting the fact and keeping the framing
   makes the doc worse, not shorter.
+- **Lean away from history in docs, and keep them short** - you tend to add "was
+  X until 11-13" and "we found that" where how things are now would do. Some
+  past belongs, by judgment, such as a write-up's list of what was tried and
+  isn't worth trying again; the rest goes in the commit or PR text. Prefer a
+  one-line pointer to a new section, and when adding, look for something to cut
 
 ### Phrasing
 
