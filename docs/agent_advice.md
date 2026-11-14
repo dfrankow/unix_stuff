@@ -169,7 +169,9 @@ The same goes for any long-running command: builds, imports, data jobs, deploys.
 **A run longer than a minute shows progress**, through tqdm or a log line per
 step, so that I can tell how far along it is. Its output goes to a file I can
 watch, never through `grep`, `tail`, `head` or another pipe that holds it back
-until the end or replaces the command's exit code with the pipe's.
+until the end or replaces the command's exit code with the pipe's. When it
+starts, tell me the `tail -f` command for that file and roughly when it will
+finish.
 
 ### TDD Approach
 
