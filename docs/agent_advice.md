@@ -6,6 +6,9 @@ files.
 
 ## Writing (Comments, Docstrings, Docs)
 
+- **Use backticks sparingly**. They are hard on the eyes in plain text.
+  Occasionally they can help mark a code object, but mostly unneeded.
+
 ### Comments
 
 - **Don't leak implementation details** - a comment or docstring says what the
@@ -199,6 +202,8 @@ exceptions if I want to preserve history of a long branch.
   update that top section. Anything else (approaches tried and dropped,
   follow-ups) goes below a `---` line and stays short, so it stays out of git
   log
+- **Use backticks in that top section only when the text would misread without
+  them** - git log shows them literally, so plain names read better
 - **When the bottom of a PR stack merges, let GitHub retarget the next one** -
   it moves the next PR's base on its own, so don't edit the base by hand. It
   rebases the branch only sometimes: after `git fetch`, if
@@ -217,6 +222,9 @@ exceptions if I want to preserve history of a long branch.
 
 - **Never git commit files without asking me first**, unless the project's
   AGENTS.md allows it for some kinds of change (doc-only, say)
+- **Never check in a person's name without asking** - code, comments, scripts
+  and commit messages say "owner" or "reviewer", or hold an ID; the answer is
+  almost always no. Who is who belongs in uncommitted memory
 - **Never skip hooks (`git --no-verify`) or bypass signing** unless explicitly
   asked
 - **Try to create new commits rather than amending** unless explicitly requested
