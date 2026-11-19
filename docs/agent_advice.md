@@ -4,48 +4,76 @@ This file is shared across machines as general advice for all agents. Python and
 Django advice lives in `agent_advice_python.md`, which loads only for those
 files.
 
+## DON'T MAKE ME WAIT
+
+You keep stopping to wait for things. **Background almost every command**: test
+suites (targeted runs included), builds, imports, data jobs, deploys. A
+foreground run blocks the session for its whole duration with nothing to read,
+which wastes my time.
+
+- Assume it will succeed. Keep working, or answer whatever question is open,
+  while it runs, without first announcing that you're about to run it
+- Report the result only if something failed. If a test fails, you can learn it
+  later
+- Don't poll a backgrounded run (an `until grep ... done` loop over its output,
+  say). Read the output when the task notification arrives
+- Wait on a result only when the next step depends on it, such as the red/green
+  step of TDD
+- Looking is not waiting: a git status or a file read takes a second, so do it
+  before asserting anything (see Look before asserting). What wastes my time is
+  sitting on long runs
+
+**A run longer than a minute shows progress**, through tqdm or a log line per
+step, so that I can tell how far along it is. Its output goes to a file I can
+watch, never through grep, tail, head or another pipe that holds it back until
+the end or replaces the command's exit code with the pipe's. When it starts,
+tell me the `tail -f` command for that file and roughly when it will finish.
+
 ## Writing (Comments, Docstrings, Docs)
 
 - **Use backticks sparingly**. They are hard on the eyes in plain text.
   Occasionally they can help mark a code object, but mostly unneeded.
 
-### Comments
+### Don't Write What Rots
+
+You keep finding new ways to write text that leaks detail and goes stale. Each
+rule below names one of them; they overlap on purpose.
 
 - **Don't leak implementation details** - a comment or docstring says what the
   code does and why, not how it works internally or how a value happened to be
   produced, so that it stays true when the implementation changes. Same for a
-  doc in `docs/`: say what to run and what judgment the reader brings, not a
-  script's flags, prompts, or output - `--help` covers those
-- **I prefer top-comments to side-comments**
-- **A TODO starts with what to do** - `TODO: Skip X when Y.` first, then any
-  background. A reader scanning TODOs wants the task, not a description of
-  today's behavior they have to turn into one
+  doc in docs/: say what to run and what judgment the reader brings, not a
+  script's flags, prompts, or output - --help covers those
 - **Make comments and docs timeless** - a comment should still be relevant in
   six months. If a detail really is time-sensitive, date it explicitly ("June
   2026: we reduced workers to 1 because...")
 - **Don't add comments with magic numbers that are likely to go out of date**
-- **Default to writing no comments** - write one only when the WHY is
-  non-obvious
-- **Don't refer to files unavailable from the repo you're in** - scratch notes
-  outside git, `tmp/` files, or docs in another checkout. Spell out the rule
-  instead of pointing at it. This applies equally to a public write-up, such as
-  one attached to an issue tracker card; attach the underlying data files if
-  reviewers need them. The rule is directional: an uncommitted doc may point at
-  a committed one, never the reverse
-- **Verify a "because" before writing it** - a reason that names other code is a
-  claim about that code, so go read it first. Asserting that some downstream
-  step needs a field, when nothing there reads it, is a reason invented to fill
-  the slot. A comment is exactly where a reader stops checking, so give the
-  reason you can confirm, or none
-- **If one rewrite does not land, stop rewording** - a reader who still does not
-  understand is missing a fact or has caught a false one. Ask what they think
-  the sentence says, or go verify the claim
+- **Lean away from history in docs, and keep them short** - you tend to add "was
+  X until 11-13" and "we found that" where how things are now would do. Some
+  past belongs, by judgment, such as a write-up's list of what was tried and
+  isn't worth trying again; the rest goes in the commit or PR text. Prefer a
+  one-line pointer over a new section, and when adding, look for something to
+  cut
 - **Describe this code, not the rest of the system** - a comment explains what
   it sits near, so that when other code changes no comment here silently goes
   wrong. Narrative that ties parts together belongs somewhere central - a module
   docstring, a README - and should be rare
 
-### Documentation Comments (docstrings / Javadoc)
+### Comments
+
+- **I prefer top-comments to side-comments**
+- **A TODO starts with what to do** - `TODO: Skip X when Y.` first, then any
+  background. A reader scanning TODOs wants the task, not a description of
+  today's behavior they have to turn into one
+- **Default to writing no comments** - write one only when the WHY is
+  non-obvious
+- **Verify a "because" before writing it** - a reason that names other code is a
+  claim about that code, so go read it first. Asserting that some downstream
+  step needs a field, when nothing there reads it, is a reason invented to fill
+  the slot. A comment is exactly where a reader stops checking, so give the
+  reason you can confirm, or none
+
+### Docs
 
 - **Say it once** - a constraint belongs in one canonical place, with everything
   else pointing there. The same hazard explained in a docstring, its mirror in
@@ -54,11 +82,12 @@ files.
   why it matters → dramatized consequence. Keep the fact, usually keep the why,
   always cut the third. Shortening by deleting the fact and keeping the framing
   makes the doc worse, not shorter.
-- **Lean away from history in docs, and keep them short** - you tend to add "was
-  X until 11-13" and "we found that" where how things are now would do. Some
-  past belongs, by judgment, such as a write-up's list of what was tried and
-  isn't worth trying again; the rest goes in the commit or PR text. Prefer a
-  one-line pointer to a new section, and when adding, look for something to cut
+- **Don't refer to files unavailable from the repo you're in** - scratch notes
+  outside git, tmp/ files, or docs in another checkout. Spell out the rule
+  instead of pointing at it. This applies equally to a public write-up, such as
+  one attached to an issue tracker card; attach the underlying data files if
+  reviewers need them. The rule is directional: an uncommitted doc may point at
+  a committed one, never the reverse
 
 ### Phrasing
 
@@ -74,17 +103,25 @@ files.
 - **Favor positive phrasing over negative** - it reads faster. "Skips
   annotations that label a whole video", not "does not include annotations that
   lack frame bounds".
+- **If one rewrite does not land, stop rewording** - a reader who still does not
+  understand is missing a fact or has caught a false one. Ask what they think
+  the sentence says, or go verify the claim
 
 ## Communication Style
 
 - **Never say "breakthrough"** - none of your results are breakthroughs
 - **Prefer full terms over abbreviations** - "leave-one-session-out" over "LOSO"
-- **Responses should be short and concise**
+- **Keep responses short**
 - **Don't overpromise** - narrowing is not solving
-- **Look before asserting the state of anything outside the conversation** -
-  whether a command was run, a file exists, a result is current. Handing someone
-  a command is not knowing they ran it, and an earlier turn says what was true
-  then. For git state, see Repository State below
+- **Look before asserting the state of anything outside the conversation** - the
+  user, a teammate, CI, a hook or a formatter can change it between turns
+  without you seeing. Your memory of the session is not the world: handing
+  someone a command is not knowing they ran it, and an earlier turn says what
+  was true then. Check before telling me to push a branch, merge or review a PR,
+  fix a CI failure, address a review comment, install a package, run a
+  migration, start a server, or log in, and before saying a file holds what you
+  last read, a background job is still running, an issue is still open, or which
+  version is deployed. For git state, see Repository State below
 - **Never use Markdown blockquotes (`> `)** - the leading `> ` is selected along
   with the text and has to be stripped by hand. Anything meant to be copied - a
   prompt for another tool, a command, a config snippet, a message to send
@@ -151,30 +188,8 @@ Not after every edit. During TDD, run only the test you are writing; save the
 full suite for the end. A run that started before your latest edit reports on
 code that no longer exists, so its result is noise, and reacting to it pulls you
 off the work in hand. Fix a failure in a follow-up commit; the pre-commit hooks
-are the gate, so don't hold a commit for a test run.
-
-### Never run tests in the foreground
-
-**Run every test suite in the background, targeted runs included.** A foreground
-run blocks the session for its whole duration with nothing to read, which wastes
-my time.
-
-- Assume the tests will pass. Keep working, or answer whatever question is open,
-  while they run
-- Report the result only if something failed
-- Don't pause to announce that you're about to run them, and don't wait on them
-  before continuing to the next thing
-- Don't poll a backgrounded run (an `until grep ... done` loop over its output,
-  say). Read the output when the task notification arrives
-
-The same goes for any long-running command: builds, imports, data jobs, deploys.
-
-**A run longer than a minute shows progress**, through tqdm or a log line per
-step, so that I can tell how far along it is. Its output goes to a file I can
-watch, never through `grep`, `tail`, `head` or another pipe that holds it back
-until the end or replaces the command's exit code with the pipe's. When it
-starts, tell me the `tail -f` command for that file and roughly when it will
-finish.
+are the gate, so don't hold a commit for a test run. Run it in the background
+(see DON'T MAKE ME WAIT).
 
 ### TDD Approach
 
@@ -228,35 +243,32 @@ exceptions if I want to preserve history of a long branch.
 - **Never skip hooks (`git --no-verify`) or bypass signing** unless explicitly
   asked
 - **Try to create new commits rather than amending** unless explicitly requested
-- **Before destructive operations, consider safer alternatives**
 
 ### Pushing
 
 - **Push after every commit, when you can** - don't stop to ask; the branch rule
   below still applies
 - **Push your own branches; never main, master or dev** - a guard in
-  `.agent.checks.sh` refuses an agent's push to any of those, so that they
-  change only through a pull request or a person at a terminal. A session
-  started before a change to the guard keeps the old one until it restarts
+  .agent.checks.sh refuses an agent's push to any of those, so that they change
+  only through a pull request or a person at a terminal
 
 ### File Operations
 
-- **`git add` new files as soon as you create them** - don't wait until commit
-  time
-- **If you change the name of a file, use `git mv`**
-- **Don't remove the executable bit from scripts**
-- **Large datasets belong in Git LFS**, under a dedicated directory (e.g.
-  `data/`)
+- **git add new files when you create them**, not at commit time
+- **If you change the name of a file, use git mv**
+- **Keep the executable bit on scripts**
+- **Large datasets belong in Git LFS**, under a dedicated directory (e.g. data/)
 
 ## Shell and Environment
 
-- **Change files with the Edit/Write tools, never through the shell** (`sed`,
-  heredocs, inline `python`), whatever the current mode says - a scripted edit
+- **Change files with the Edit/Write tools, never through the shell** (sed,
+  heredocs, inline python), whatever the current mode says - a scripted edit
   shows only its own source, not the resulting diff, so a replacement that
   matches too much or too little lands unreviewed
+- **Before destructive operations, consider safer alternatives**
 - **No "timeout" command on macOS** - it doesn't exist
-- **Put temporary files in `tmp/DATE`** where DATE is MMDD or YYYYMMDD
-- **If a debugging tool will be generally useful, put it in `bin/`**
-- **You can use `jq` to parse JSON or NDJSON**
+- **Put temporary files in tmp/DATE** where DATE is MMDD or YYYYMMDD
+- **If a debugging tool will be generally useful, put it in bin/**
+- **You can use jq to parse JSON or NDJSON**
 - **Put a command to run that is more than one line in a file** - pasting from
   the CLI picks up stray indentation and trailing spaces
