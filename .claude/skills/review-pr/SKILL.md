@@ -89,7 +89,28 @@ settled decisions:
 **Then everything else** — naming, ordering, readability — only where it
 genuinely impairs understanding.
 
-## 4. How to write the findings
+## 4. Score the risk
+
+Open the terminal report with one line: Risk N/5, and the reason in a few words.
+It is for the user, to decide how hard to look; never post it. Score the whole
+PR by what happens if its riskiest change is wrong:
+
+- 5: exposes PHI or other personal data, loses money or data, or opens a
+  security hole, and is hard to undo (auth, billing, destructive migrations,
+  writes to systems of record, production secrets)
+- 4: breaks a core flow or is hard to roll back (shared plumbing, schema
+  changes, deploy and infra config)
+- 3: breaks one feature, easy to roll back
+- 2: visible but contained (UI copy, internal tooling)
+- 1: near harmless (docs, tests, comments)
+
+Judge the change, not the file path: a comment edit in auth code is a 1. Raise
+by one if no test would catch the riskiest change failing, or if it must deploy
+in step with a migration or another service. Lower by one if it sits behind a
+flag that is off by default. Findings don't move the score; they go under
+Blocking.
+
+## 5. How to write the findings
 
 - Every point opens with **one sentence naming the problem**. Suggest a fix
   after that if you have a good one; never lead with the action or bold it as
@@ -126,10 +147,10 @@ review.
   prefix comes along with the selection.
 - Don't wrap lines; GitHub reflows.
 
-## 5. Posting
+## 6. Posting
 
-Print the review in the terminal first. Show the exact text before posting
-anything to GitHub, and post only when the user says to — a review is
-outward-facing and there is no clean undo.
+Print the review in the terminal first, under the risk line. Show the exact text
+before posting anything to GitHub, and post only when the user says to — a
+review is outward-facing and there is no clean undo.
 
 Keep the terminal summary to a few lines, not a categorized breakdown.
