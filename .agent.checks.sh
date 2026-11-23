@@ -322,6 +322,15 @@ git() {
     command git "$@"
 }
 
+# A shell that exports git hands it to the bash scripts git runs, such as hooks,
+# so the helpers are exported too; without them the wrapper fails inside the
+# hook. zsh has no exported functions, so this is bash only.
+if [ -n "${BASH_VERSION:-}" ]; then
+    export -f agent_branch_start_point agent_reject_remote_start_point \
+        agent_reject_stale_start_point agent_push_targets_trunk \
+        agent_reject_attribution agent_reject_filler_words
+fi
+
 # Prevent pip install without -r (installing random packages)
 pip() {
     if [ "$1" = "install" ]; then

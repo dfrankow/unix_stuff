@@ -266,6 +266,9 @@ exceptions if I want to preserve history of a long branch.
   shows only its own source, not the resulting diff, so a replacement that
   matches too much or too little lands unreviewed
 - **Before destructive operations, consider safer alternatives**
+- **When local tooling breaks, fix it** - a failing hook, guard or script gets
+  fixed at the cause, with its tests run, so that the next session does not hit
+  it again; don't work around it or ask first
 - **No "timeout" command on macOS** - it doesn't exist
 - **Put temporary files in tmp/DATE** where DATE is MMDD or YYYYMMDD
 - **If a debugging tool will be generally useful, put it in bin/**
