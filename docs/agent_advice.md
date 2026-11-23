@@ -217,6 +217,10 @@ exceptions if I want to preserve history of a long branch.
   update that top section. Anything else (approaches tried and dropped,
   follow-ups) goes below a `---` line and stays short, so it stays out of git
   log
+- **End the description with a Testing section** - two or three bullets below
+  the `---` line saying what a reviewer should check to approve: what to run
+  and what its output should show, or the judgment call the PR asks of them
+  (clinical, design). Keep it below the line so that it stays out of git log
 - **Use backticks in that top section only when the text would misread without
   them** - git log shows them literally, so plain names read better
 - **When the bottom of a PR stack merges, let GitHub retarget the next one** -
@@ -266,6 +270,13 @@ exceptions if I want to preserve history of a long branch.
   shows only its own source, not the resulting diff, so a replacement that
   matches too much or too little lands unreviewed
 - **Before destructive operations, consider safer alternatives**
+- **Never let a secret reach your output** - Treat any output that can
+  hold one as secret: credential files, `aptible db:tunnel` and
+  `db:url` output, process listings (`ps`, `pgrep -l`) that show a DB
+  URL. Show only lines you have proven harmless, such as `grep -c
+  Connected` on a tunnel's log, never a redacted view, since redaction
+  misses the line you didn't foresee. Hand a secret to a command
+  through an environment variable, never its arguments
 - **When local tooling breaks, fix it** - a failing hook, guard or script gets
   fixed at the cause, with its tests run, so that the next session does not hit
   it again; don't work around it or ask first
