@@ -58,6 +58,11 @@ rule below names one of them; they overlap on purpose.
   it sits near, so that when other code changes no comment here silently goes
   wrong. Narrative that ties parts together belongs somewhere central - a module
   docstring, a README - and should be rare
+- **Point at the past, not the future** - text may cite what already happened or
+  what it depends on (a merged PR, the card that blocks it), but not work still
+  to come ("sc-N will add the same check", "a follow-up handles Y"), so that a
+  change of plan doesn't leave it wrong. Applies to PR descriptions and cards
+  as much as comments
 
 ### Comments
 
