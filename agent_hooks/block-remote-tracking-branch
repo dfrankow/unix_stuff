@@ -3,7 +3,9 @@
 # Deny creating a branch from a remote ref (e.g. `git switch -c foo origin/dev`)
 # without --no-track, so that the new branch does not take origin/dev as its
 # upstream and a later plain `git push` is not refused for the name mismatch.
-# An explicit --track or --no-track passes.
+# An explicit --track or --no-track passes, except from a remote main or
+# master: .agent.checks.sh refuses those outright, so the advice there is to
+# update the local branch from the remote and branch from it.
 #
 # Reads the PreToolUse payload on stdin and prints a deny decision, or nothing.
 
@@ -17,13 +19,19 @@ remote_ref='(origin|upstream)/[^ ;&|]+'
 switch_from_remote="$git_cmd (switch|checkout)[^;&|]* -[cCbB] [^;&|]*$remote_ref"
 branch_from_remote="$git_cmd branch [^-;&| ][^ ;&|]* $remote_ref"
 printf '%s' "$command" | grep -qE "($switch_from_remote|$branch_from_remote)" || exit 0
-printf '%s' "$command" | grep -qE -- '(--no-track|--track|(^| )-t( |$))' && exit 0
 
-jq -n '{
+if printf '%s' "$command" | grep -qE '(origin|upstream)/(main|master)([ ;&|]|$)'; then
+    reason="Update local main from origin, then branch from it: git switch main && git pull && git switch -c <branch>."
+else
+    printf '%s' "$command" | grep -qE -- '(--no-track|--track|(^| )-t( |$))' && exit 0
+    reason="Add --no-track when branching from a remote ref (git switch --no-track -c <branch> origin/<base>), so the branch does not take the remote base as its upstream."
+fi
+
+jq -n --arg reason "$reason" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
     permissionDecision: "deny",
-    permissionDecisionReason: "Add --no-track when branching from a remote ref (git switch --no-track -c <branch> origin/<base>), so the branch does not take the remote base as its upstream."
+    permissionDecisionReason: $reason
   }
 }'
 exit 0
