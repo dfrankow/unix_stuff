@@ -108,6 +108,19 @@ rule below names one of them; they overlap on purpose.
 - **Favor positive phrasing over negative** - it reads faster. "Skips
   annotations that label a whole video", not "does not include annotations that
   lack frame bounds".
+- **Repeat the noun rather than use a pronoun** - "it", "them", "this" and
+  "one" send the reader back to find the noun, and with two candidates they
+  pick the wrong one. "Raising the timeout fixes 4 failures", not "Raising it
+  fixes 4".
+- **Use no semicolons** - one usually joins a finding to a recommendation, or a
+  gain to a cost, so the reader takes in two claims at once. Write two
+  sentences.
+- **Don't coin names for options** - "the cache-first option" is a label the
+  reader must learn. Say what changes, each time.
+- **Give a cost its number** - "costs accuracy" or "hurts recall" sounds
+  complete but hides the size. "Adds 45 errors".
+- **Use literal verbs** - "falls through to the default" and "costs" are
+  metaphors to translate. "The request gets the default timeout".
 - **If one rewrite does not land, stop rewording** - a reader who still does not
   understand is missing a fact or has caught a false one. Ask what they think
   the sentence says, or go verify the claim
