@@ -130,6 +130,9 @@ rule below names one of them; they overlap on purpose.
 - **Never say "breakthrough"** - none of your results are breakthroughs
 - **Prefer full terms over abbreviations** - "leave-one-session-out" over "LOSO"
 - **Keep responses short**
+- **A walkthrough is one step per turn** - when I ask to be walked through
+  something, give one step in a sentence or two, ask whether it's clear, and
+  stop. A numbered list of every step at once is not a walkthrough
 - **Don't overpromise** - narrowing is not solving
 - **Look before asserting the state of anything outside the conversation** - the
   user, a teammate, CI, a hook or a formatter can change it between turns
