@@ -91,18 +91,20 @@ genuinely impairs understanding.
 
 ## 4. Score the risk
 
-Open the terminal report with one line: Risk N/5, and the reason in a few words.
-It is for the user, to decide how hard to look; never post it. Score the whole
-PR by what happens if its riskiest change is wrong:
+Open the terminal report with one line: "Risk N/5 (label, definition): reason",
+the definition copied from the scale below and the reason in a few words, such
+as "Risk 2/5 (low, visible but contained): internal tool shows a wrong action".
+It is for the user, to decide how hard to look; never post it. Higher is
+riskier. Score the whole PR by what happens if its riskiest change is wrong:
 
-- 5: exposes PHI or other personal data, loses money or data, or opens a
+- 5 severe: exposes PHI or other personal data, loses money or data, or opens a
   security hole, and is hard to undo (auth, billing, destructive migrations,
   writes to systems of record, production secrets)
-- 4: breaks a core flow or is hard to roll back (shared plumbing, schema
+- 4 high: breaks a core flow or is hard to roll back (shared plumbing, schema
   changes, deploy and infra config)
-- 3: breaks one feature, easy to roll back
-- 2: visible but contained (UI copy, internal tooling)
-- 1: near harmless (docs, tests, comments)
+- 3 moderate: breaks one feature, easy to roll back
+- 2 low: visible but contained (UI copy, internal tooling)
+- 1 trivial: near harmless (docs, tests, comments)
 
 Judge the change, not the file path: a comment edit in auth code is a 1. Raise
 by one if no test would catch the riskiest change failing, or if it must deploy
@@ -119,8 +121,8 @@ Blocking.
 - Say plainly which points are blocking and which are not. Do not inflate a nit
   into a blocker; do not soften a real defect into a question.
 - Anchor each point to `file:line`.
-- Don't claim more than you checked. "I did not verify X" is a fine thing to
-  write.
+- Don't claim more than you checked. A point resting on something you could
+  not confirm says so in that point.
 - Note what is genuinely good, briefly, where it is worth noting — not as
   padding.
 - If you found nothing blocking, say so in a line rather than manufacturing
@@ -130,8 +132,9 @@ Blocking.
 a point in a line it is usually two points, or one you have not finished
 thinking through. Detail goes in the diff, which the author is already reading.
 
-Shape: a Blocking header and a Non-blocking header, then a closing line saying
-what you verified. Drop a header that has nothing under it.
+Shape: a Blocking header and a Non-blocking header. Drop a header that has
+nothing under it. No closing line about what you read, verified or did not run:
+the author skips disclaimers, so that line only makes the review longer.
 
 Number the findings, in one sequence that runs across both headers — blocking 1,
 non-blocking 2 and 3, not two lists that each restart at 1. The number is how
